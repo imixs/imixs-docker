@@ -14,7 +14,7 @@ The Docker image is based on debian:jessie.
 
 imixs/smarthost provides the following environment variables
 
- * EXIM_SMARTHOST - your mail server 
+ * EXIM_SMARTHOST - your target mail server 
  * EXIM_PASSWORD - authenticating to a remote host as a client.
 
 
@@ -26,10 +26,12 @@ Follow the [Docker installation instructions](https://docs.docker.com/engine/ins
 The container can be started in background as an demon. You can start an instance run command:
     
     docker run --name="smarthost" -d \
-	-e EXIM_SMARTHOST="my-mailserver:25" \
-	-e EXIM_PASSWORD="my-password" \
+	-e EXIM_SMARTHOST="target.mail.server.example:25" \
+	-e EXIM_PASSWORD="target.mail.server.example:login:password" \
 	imixs/smarthost 
 
+The environment parameter 'EXIM_SMARTHOST' points to the target mail sever used by exim4.
+The environment parameter 'EXIM_PASSWORD' is written to the exim4/passwd file. This parameter contains the target mail server, user and login data.
 
 To stop and remove the Docker container run the Docker command: 
 
@@ -52,8 +54,7 @@ With the following command you can test sending out an email
     echo "This is the message" | mail -s "The subject" captain.kirk@myhost.com -aFrom:sender@myhost.com
     
 
-    
- 
+     
 # Contribute
 The source is available on [Github](https://github.com/imixs/imixs-docker). Please [report any issues](https://github.com/imixs/imixs-docker/issues).
 
