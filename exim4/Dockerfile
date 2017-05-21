@@ -16,5 +16,6 @@ ADD start.sh /exim_start
 RUN chmod +x /exim_start
 
 ENV EXIM_LOCALINTERFACE=0.0.0.0
+ENV EXIM_ALLOWED_SENDERS=172.17.0.0/24:127.0.0.1
 
 ENTRYPOINT ["/exim_start"]

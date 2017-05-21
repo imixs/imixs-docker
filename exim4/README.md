@@ -14,9 +14,11 @@ The Docker image is based on debian:jessie.
 
 imixs/smarthost provides the following environment variables
 
- * EXIM_SMARTHOST - your target mail server 
- * EXIM_PASSWORD - authenticating to a remote host as a client.
+* EXIM_SMARTHOST - your target mail server 
+* EXIM_PASSWORD - authenticating to a remote host as a client.
+* EXIM\_ALLOWED\_SENDERS - defines the docker containers to be allowed to send mails (default=172.17.0.0/24:127.0.0.1)
 
+Take care about the environment setting for EXIM\_ALLOWED\_SENDERS. This can be set to network/ip addresses inside your docker virtual network. 
 
 ## 1. Install Docker
 Follow the [Docker installation instructions](https://docs.docker.com/engine/installation/) for your host system.
@@ -58,4 +60,7 @@ With the following command you can test sending out an email
 # Contribute
 The source is available on [Github](https://github.com/imixs/imixs-docker). Please [report any issues](https://github.com/imixs/imixs-docker/issues).
 
+To build the image from the Dockerfile run: 
+
+    docker build --tag=imixs/smarthost .
  
