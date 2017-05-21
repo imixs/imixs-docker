@@ -1,6 +1,6 @@
 # imixs/smarthost
 
-This Docker image provides a mail transfer agent (MTA) running as a smarthost. The container can be used to send out e-mails from other containers.
+This Docker image provides a mail transfer agent (MTA) running as a smarthost for Docker containers. The container can be used to send out e-mails from other containers.
 
 The MTA is based on [Exim4](http://www.exim.org/). The Image was inspired by the Docker Image from [greinacker/exim4](https://hub.docker.com/r/greinacker/exim4/).
 The Docker image is based on debian:jessie. 
@@ -8,7 +8,7 @@ The Docker image is based on debian:jessie.
 
 ## Features
 * inherit form debian:jessie
-* provide a minimal smarthost configuration
+* provide a minimal MTA Smarthost Configuration
 
 ### Environment
 
@@ -16,16 +16,15 @@ imixs/smarthost provides the following environment variables
 
 * EXIM_SMARTHOST - your target mail server 
 * EXIM_PASSWORD - authenticating to a remote host as a client.
-* EXIM\_ALLOWED\_SENDERS - defines the docker containers to be allowed to send mails (default=172.17.0.0/24:127.0.0.1)
+* EXIM\_ALLOWED\_SENDERS - allowed sender IP/Network addresses (default=172.17.0.0/24:127.0.0.1)
 
-Take care about the environment setting for EXIM\_ALLOWED\_SENDERS. This can be set to network/ip addresses inside your docker virtual network. 
 
 ## 1. Install Docker
 Follow the [Docker installation instructions](https://docs.docker.com/engine/installation/) for your host system.
 
 
 ## 2. Running and stopping a container
-The container can be started in background as an demon. You can start an instance run command:
+The container can be started in background as an demon. You can start an instance with the command:
     
     docker run --name="smarthost" -d \
 	-e EXIM_SMARTHOST="target.mail.server.example:25" \
@@ -55,6 +54,20 @@ With the following command you can test sending out an email
 
     echo "This is the message" | mail -s "The subject" captain.kirk@myhost.com -aFrom:sender@myhost.com
     
+
+
+# Linking the Container
+
+You can link the smarthost Docker container to other containers in your Docker network to allow them to send out mail via the smarthost.
+
+Take care about the default environment setting: 
+
+
+	EXIM_ALLOWED_SENDERS=172.17.0.0/24:127.0.0.1
+	
+This environment variable defines, if other docker containers running on your docker host, are allowed to use the MTA for sending out e-mails. The default setting is "172.17.0.0/24:127.0.0.1", which allows all linked containers to send mails. Customize this parameter if you have custom needs in your docker virtual network. If the setting is not set correct, you will typically see a log message like 
+
+	...exim4 IP address .. relay not permitted...
 
      
 # Contribute
