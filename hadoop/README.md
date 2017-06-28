@@ -1,8 +1,8 @@
-# imixs-docker/hadoop
+# imixs/hadoop
 
-The Docker Image 'imixs-docker/hadoop' provides a Docker image to setup a single node hadoop clust. This container can be used to test the hadoop WebHDFS Rest API. The image is based on the [official openjdk:8 Docker image](https://hub.docker.com/r/_/openjdk/).
+The Docker Image 'imixs/hadoop' provides a Docker image to setup a single node hadoop clust. This container can be used to test the hadoop WebHDFS Rest API. The image is based on the [official openjdk:8 Docker image](https://hub.docker.com/r/_/openjdk/).
 
-The 'imixs-docker/hadoop' provides the following features:
+The 'imixs/hadoop' provides the following features:
 
 ## Features
 * inherit form officeal openJDK
