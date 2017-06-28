@@ -40,7 +40,7 @@ To stop and remove the Docker container run the Docker command:
 
 
 
-# Testing 
+# 3. Testing 
 
 You can access the hadoop Web Interface from your browser:
 
@@ -114,13 +114,12 @@ The source is available on [Github](https://github.com/imixs/imixs-docker). Plea
 
 Checkout the sources from GitHub:
 
-	git clone https://github.com/ruo91/docker-hadoop.git /opt/docker-hadoop
-root@ruo91:~# cd /opt/docker-hadoop
-root@ruo91:~# git checkout -b 2.7.x origin/2.7.x
+	git clone https://github.com/imixs/imixs-docker.git 
+	git checkout -b master origin/master
 
 To build the image from the Dockerfile run: 
 
-    docker build --tag=imixs/hadoop .
+    docker build --tag=imixs/hadoop ./hadoop
 
 To log into the container, start it and run:
     
