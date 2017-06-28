@@ -28,10 +28,9 @@ The container includes a start script which allows to start Hadoop and Wildfly. 
 
     docker run --name="hadoop" -d -p 9000:9000 -p 50070:50070 -p 50075:50075  imixs/hadoop
     
-or interactive:
+Show Logfiles
 
-    docker run --name="hadoop" -it -p 9000:9000 -p 50070:50070 -p 50075:50075  imixs/hadoop
-
+    docker logs -f hadoop
 
 
 To stop and remove the Docker container run the Docker command:
@@ -55,11 +54,12 @@ Start a bash in the running container:
 
 Next create and read a file:
 
-	root@3960dc1b946c:/opt# for((i=0; i<10; i++)) do echo ${i}; done > test.log
-	root@3960dc1b946c:/opt# hdfs dfs -copyFromLocal test.log /
+
+	root@3960dc1b946c:/opt# echo "Hello Hadoop :-)" > test.txt
+	root@3960dc1b946c:/opt# hdfs dfs -copyFromLocal test.txt /
 	root@3960dc1b946c:/opt# hdfs dfs -ls /
 	Found 1 items
-	-rw-r--r--   1 root supergroup         20 2017-06-28 20:51 /test.log
+	-rw-r--r--   1 root supergroup         18 2017-06-28 21:45 /test.txt
 	
 
 You will see the output in the hadoop log file and the new created file:
@@ -69,7 +69,7 @@ You will see the output in the hadoop log file and the new created file:
 
 To test the Rest API you can run the culr command from inside the container:
 
-	curl -i -L "http://localhost:50070/webhdfs/v1/test.log?op=OPEN"
+	curl -i -L "http://localhost:50070/webhdfs/v1/test.txt?op=OPEN"
 
 This curl command follows the Temporary Redirect response to a datanode and obtains the file data with the following response:
 
@@ -92,18 +92,9 @@ This curl command follows the Temporary Redirect response to a datanode and obta
 	Access-Control-Allow-Origin: *
 	Content-Type: application/octet-stream
 	Connection: close
-	Content-Length: 20
+	Content-Length: 17
 	
-	0
-	1
-	2
-	3
-	4
-	5
-	6
-	7
-	8
-	9
+	Hello Hadoop :-)
 	root@3960dc1b946c:/opt# 
 
 
