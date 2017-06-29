@@ -26,8 +26,10 @@ Follow the [Docker installation instructions](https://docs.docker.com/engine/ins
 # 2. Running and stopping a container
 The container includes a start script which allows to start Hadoop and Wildfly. You can start the container with the Docker run command:
 
-    docker run --name="hadoop" -d -p 9000:9000 -p 50070:50070 -p 50075:50075  imixs/hadoop
+    docker run --name="hadoop" -d -h my-hadoop-cluster.local -p 9000:9000 -p 50070:50070 -p 50075:50075  imixs/hadoop
     
+The option -h defines a host name for the running container. This hostname is important as the WebHDFS will redirect to the datanode with this host name. You should define this host name in your client test environment.
+
 Show Logfiles
 
     docker logs -f hadoop
@@ -55,9 +57,9 @@ Start a bash in the running container:
 Next create and read a file:
 
 
-	root@3960dc1b946c:/opt# echo "Hello Hadoop :-)" > test.txt
-	root@3960dc1b946c:/opt# hdfs dfs -copyFromLocal test.txt /
-	root@3960dc1b946c:/opt# hdfs dfs -ls /
+	root@my-hadoop-cluster:/opt# echo "Hello Hadoop :-)" > test.txt
+	root@my-hadoop-cluster:/opt# hdfs dfs -copyFromLocal test.txt /
+	root@my-hadoop-cluster:/opt# hdfs dfs -ls /
 	Found 1 items
 	-rw-r--r--   1 root supergroup         18 2017-06-28 21:45 /test.txt
 	
@@ -83,7 +85,7 @@ This curl command follows the Temporary Redirect response to a datanode and obta
 	Pragma: no-cache
 	Content-Type: application/octet-stream
 	X-FRAME-OPTIONS: SAMEORIGIN
-	Location: http://3960dc1b946c:50075/webhdfs/v1/test.log?op=OPEN&namenoderpcaddress=localhost:8020&offset=0
+	Location: http://my-hadoop-cluster:50075/webhdfs/v1/test.log?op=OPEN&namenoderpcaddress=localhost:8020&offset=0
 	Content-Length: 0
 	Server: Jetty(6.1.26)
 	
@@ -95,7 +97,7 @@ This curl command follows the Temporary Redirect response to a datanode and obta
 	Content-Length: 17
 	
 	Hello Hadoop :-)
-	root@3960dc1b946c:/opt# 
+	root@my-hadoop-cluster:/opt# 
 
 
 
