@@ -1,22 +1,24 @@
 # imixs/hadoop
 
-The Docker Image 'imixs/hadoop' provides a Docker image to setup a single node hadoop clust. This container can be used to test the hadoop WebHDFS Rest API. The image is based on the [official openjdk:8 Docker image](https://hub.docker.com/r/_/openjdk/).
+The Docker Image 'imixs/hadoop' provides a Docker image to setup a single node hadoop clust. This container can be used to test the hadoop WebHDFS Rest API. The image is based on the [official openjdk:8 Docker image](https://hub.docker.com/r/_/openjdk/) and was inspired from [athlinks/hadoop](https://hub.docker.com/r/athlinks/hadoop/).
 
 The 'imixs/hadoop' provides the following features:
 
 ## Features
-* inherit form officeal openJDK
+* inherit form official openJDK
 * runs hadoop with OpenJDK 8
 * starts a single node hadoop cluster
 * support WebHDFS Rest API
 * installation path: /opt/hadoop 
-* linux user: imixs
+* linux user: hduser
+* data volume /data/hdfs/
 
-The Imixs-hadoop system is typically protected from external access. For that reason no kerberos security module is part of this image.
+**NOTE:**
+This Docker image is for test purpose only. The container should only run in a system environment protected from external access. For that reason no kerberos security module is part of this image.
 
 ## WebHDFS – Rest API
 
-Apache Hadoop provides a high performance native protocol for accessing HDFS. While this is great for Hadoop applications running inside a Hadoop cluster, external applications typically need to connect to HDFS from the outside. Usining the native HDFS protocol means installing Hadoop and a Java binding with those applications. To access the hadoop cluster without these libraries a standard RESTful mechanism, called WebHDFS can be used. As part of this, WebHDFS takes advantages of the parallelism that a Hadoop cluster offers. Further, WebHDFS retains the security that the native Hadoop protocol offers. It also fits well into the overall strategy of providing web services access to all Hadoop components. Read also the official documentation of the Hadoop [WebHDFS REST API](https://hadoop.apache.org/docs/r2.8.0/hadoop-project-dist/hadoop-hdfs/WebHDFS.html).
+Apache Hadoop provides a high performance native protocol for accessing HDFS. While this is great for Hadoop applications running inside a Hadoop cluster, external applications typically need to connect to HDFS from the outside. Using the native HDFS protocol means installing Hadoop and a Java binding with those applications. To access the hadoop cluster without these libraries a standard RESTful mechanism, called WebHDFS can be used. As part of this, WebHDFS takes advantages of the parallelism that a Hadoop cluster offers. Further, WebHDFS retains the security that the native Hadoop protocol offers. It also fits well into the overall strategy of providing web services access to all Hadoop components. Read also the official documentation of the Hadoop [WebHDFS REST API](https://hadoop.apache.org/docs/r2.8.0/hadoop-project-dist/hadoop-hdfs/WebHDFS.html).
 
 
 
@@ -24,13 +26,14 @@ Apache Hadoop provides a high performance native protocol for accessing HDFS. Wh
 Follow the [Docker installation instructions](https://docs.docker.com/engine/installation/) for your host system.
 
 # 2. Running and stopping a container
-The container includes a start script which allows to start Hadoop and Wildfly. You can start the container with the Docker run command:
+The container includes a start script running a namenode and a datanode. You can start the container with the Docker run command:
 
     docker run --name="hadoop" -d -h my-hadoop-cluster.local -p 9000:9000 -p 50070:50070 -p 50075:50075  imixs/hadoop
     
-The option -h defines a host name for the running container. This hostname is important as the WebHDFS will redirect to the datanode with this host name. You should define this host name in your client test environment.
+**NOTE:** 
+The option "-h my-hadoop-cluster.local" defines a host name for the running container. This hostname is important as the WebHDFS will redirect to the datanode with this host name. You should define this host name in your client test environment.
 
-Show Logfiles
+To show Logfiles from the running container run command:
 
     docker logs -f hadoop
 
@@ -56,15 +59,13 @@ Start a bash in the running container:
 
 Next create and read a file:
 
-
 	root@my-hadoop-cluster:/opt# echo "Hello Hadoop :-)" > test.txt
 	root@my-hadoop-cluster:/opt# hdfs dfs -copyFromLocal test.txt /
 	root@my-hadoop-cluster:/opt# hdfs dfs -ls /
 	Found 1 items
 	-rw-r--r--   1 root supergroup         18 2017-06-28 21:45 /test.txt
 	
-
-You will see the output in the hadoop log file and the new created file:
+You will see the output in the hadoop log file and the new created file.
 
 
 ## Testing the WebHDFS Rest API

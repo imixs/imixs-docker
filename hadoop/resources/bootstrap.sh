@@ -22,3 +22,4 @@ $HADOOP_HOME/sbin/start-dfs.sh
 echo "Hadoop Startup completed" 
 # keep running in the foreground
 tail -f $HADOOP_HOME/logs/*
+#tail -f /dev/null 

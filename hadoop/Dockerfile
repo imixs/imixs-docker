@@ -28,6 +28,27 @@ WORKDIR /opt
 RUN curl http://mirror.softaculous.com/apache/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz | tar zx \
  && ln -s /opt/hadoop-$HADOOP_VERSION/ /opt/hadoop 
 
+
+# Setup passwordless ssh
+ADD resources/ssh/* /etc/ssh/
+RUN rm -f /etc/ssh/ssh_host_ecdsa_key && ssh-keygen -q -N "" -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key && \ 
+	rm -f /etc/ssh/ssh_host_ed25519_key && ssh-keygen -q -N "" -t ed25519 -f /etc/ssh/ssh_host_ed25519_key && \
+    rm -f /etc/ssh/ssh_host_dsa_key && ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key && \
+    rm -f /etc/ssh/ssh_host_rsa_key && ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key && \
+    rm -f /etc/ssh/id_rsa && ssh-keygen -q -N "" -t rsa -f /etc/ssh/id_rsa && \ 
+	cp /etc/ssh/id_rsa.pub /etc/ssh/authorized_keys && \
+    mkdir -p /root/.ssh && \
+    cp /etc/ssh/ssh_config /root/.ssh/config && \
+    cp /etc/ssh/authorized_keys /root/.ssh/authorized_keys && \
+    cp /etc/ssh/id_rsa /root/.ssh/id_rsa && \
+    chmod 700 /root/.ssh && \
+    chmod 600 /root/.ssh/config && \
+    chmod 600 /root/.ssh/id_rsa && \
+    chmod 600 /root/.ssh/authorized_keys && \
+    cp -a /root/.ssh /home/hduser/.ssh && \
+    chown -R hduser:hadoop /home/hduser/.ssh
+
+
 # Set Hadoop environment variables
 ENV HADOOP_INSTALL=/opt/hadoop \
   HADOOP_HOME=/opt/hadoop \
@@ -39,42 +60,9 @@ ENV HADOOP_INSTALL=/opt/hadoop \
   
 ENV PATH=$PATH:/opt/hadoop/bin 
 ENV PATH=$PATH:/opt/hadoop/sbin    
-  
-RUN chown -R hduser:hadoop $HADOOP_HOME && \
-    chmod +x $HADOOP_HOME/etc/hadoop/*-env.sh && \
-    mkdir $HADOOP_HOME/input && \
-    cp $HADOOP_HOME/etc/hadoop/*.xml $HADOOP_HOME/input && \
-    mkdir -p /data/hdfs && \
-    chown -R hduser:hadoop /data/hdfs && \
-    rm -rf /tmp/*
-    
+      
 # fix java_home env...
 RUN sed -i '/^export JAVA_HOME/ s:.*:export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64:' $HADOOP_INSTALL/etc/hadoop/hadoop-env.sh
-    
-    
-
-  
-  
-USER hduser
-
-WORKDIR $HADOOP_HOME
-
-VOLUME /data/hdfs
-
-USER root
-
-    
-    
-# SSH keygen Passwordless
-RUN cd /root \
- && ssh-keygen -t rsa -P '' -f "/root/.ssh/id_rsa" \
- && cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys \
- && chmod 644 /root/.ssh/authorized_keys
-
-# disable ssh strict host key check
-RUN sed -i '/StrictHostKeyChecking/s/#//g' /etc/ssh/ssh_config \
-    && sed -i '/StrictHostKeyChecking/s/ask/no/g' /etc/ssh/ssh_config
-
 
 
 # issue plattform warning
@@ -91,15 +79,25 @@ ADD resources/yarn-site.xml /opt/hadoop/etc/hadoop/
 # add bootstrap
 ADD resources/bootstrap.sh /etc/bootstrap.sh
 
-
+# Make hduser the owner of the hadoop process  
 RUN chown -R hduser:hadoop $HADOOP_HOME && \
+    chmod +x $HADOOP_HOME/etc/hadoop/*-env.sh && \
+    mkdir -p /data/hdfs && \
     chown -R hduser:hadoop /data/hdfs && \
-    chown -R hduser:hadoop /home/hduser
+    rm -rf /tmp/*
     
-    
-    
-RUN chown root:root /etc/bootstrap.sh
+RUN chown hduser:root /etc/bootstrap.sh
 RUN chmod 700 /etc/bootstrap.sh
+
+# TODO : try to start hadoop as user hduser 
+USER hduser
+
+WORKDIR $HADOOP_HOME
+
+VOLUME /data/hdfs
+
+# TODO: we can't yet start hadoop as user hduser
+USER root
 
 EXPOSE 9000 50070 50075 
 
