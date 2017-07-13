@@ -1,8 +1,8 @@
 # imixs/hadoop
 
-The Docker Image 'imixs/hadoop' provides a Docker image to setup a single node hadoop clust. This container can be used to test the hadoop WebHDFS Rest API. The image is based on the [official openjdk:8 Docker image](https://hub.docker.com/r/_/openjdk/) and was inspired from [athlinks/hadoop](https://hub.docker.com/r/athlinks/hadoop/).
+The Docker Image 'imixs/hadoop' provides a Docker image to setup a single node hadoop cluster. This container can be used to test the hadoop WebHDFS Rest API. The image is based on the [official openjdk:8 Docker image](https://hub.docker.com/r/_/openjdk/) and was inspired from [athlinks/hadoop](https://hub.docker.com/r/athlinks/hadoop/).
 
-The 'imixs/hadoop' provides the following features:
+The Docker Image 'imixs/hadoop' provides the following features:
 
 ## Features
 * inherit form official openJDK
@@ -20,24 +20,33 @@ This Docker image is for test purpose only. The container should only run in a s
 
 Apache Hadoop provides a high performance native protocol for accessing HDFS. While this is great for Hadoop applications running inside a Hadoop cluster, external applications typically need to connect to HDFS from the outside. Using the native HDFS protocol means installing Hadoop and a Java binding with those applications. To access the hadoop cluster without these libraries a standard RESTful mechanism, called WebHDFS can be used. As part of this, WebHDFS takes advantages of the parallelism that a Hadoop cluster offers. Further, WebHDFS retains the security that the native Hadoop protocol offers. It also fits well into the overall strategy of providing web services access to all Hadoop components. Read also the official documentation of the Hadoop [WebHDFS REST API](https://hadoop.apache.org/docs/r2.8.0/hadoop-project-dist/hadoop-hdfs/WebHDFS.html).
 
+{Imixs-Archive](https://github.com/imixs/imixs-archive) is based on the WebHDFS Rest API: 
 
 
 # 1. Install Docker
 Follow the [Docker installation instructions](https://docs.docker.com/engine/installation/) for your host system.
 
 # 2. Running and stopping a container
-The container includes a start script running a namenode and a datanode. You can start the container with the Docker run command:
+The container includes a start script running a namenode and a datanode. The container can be started with the following Docker run command:
 
     docker run --name="hadoop" -d -h my-hadoop-cluster.local -p 9000:9000 -p 50070:50070 -p 50075:50075  imixs/hadoop
+
+Thie docker container can be access via the WebHDFS Rest API as also the Hadoop Web Client. 
+When the container is started the first time, it automatically formats a Docker data volume for the hadoop filesystem HDFS. To restart an existing contaienr run the command:
+
+	docker start hadoop
     
 **NOTE:** 
 The option "-h my-hadoop-cluster.local" defines a host name for the running container. This hostname is important as the WebHDFS will redirect to the datanode with this host name. You should define this host name in your client test environment.
+
+
+### Log Files
 
 To show Logfiles from the running container run command:
 
     docker logs -f hadoop
 
-
+### Stopping the container 
 To stop and remove the Docker container run the Docker command:
 
     docker stop hadoop && docker rm hadoop
@@ -52,12 +61,11 @@ You can access the hadoop Web Interface from your browser:
 
 <img src="screen_001.png" alt="Imixs-BPMN" width="640"/>
 
-To test the hadoop file system, first create a test file.
-Start a bash in the running container:
+To test the hadoop file system, first start a bash in the running container:
 
 	docker exec -it hadoop /bin/bash	
 
-Next create and read a file:
+Next create and read a test file:
 
 	root@my-hadoop-cluster:/opt# echo "Hello Hadoop :-)" > test.txt
 	root@my-hadoop-cluster:/opt# hdfs dfs -copyFromLocal test.txt /
