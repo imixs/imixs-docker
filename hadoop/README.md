@@ -1,6 +1,6 @@
 # imixs/hadoop
 
-The Docker Image 'imixs/hadoop' provides a Docker image to setup a single node hadoop cluster. This container can be used to test the hadoop WebHDFS Rest API. The image is based on the [official openjdk:8 Docker image](https://hub.docker.com/r/_/openjdk/) and was inspired from [athlinks/hadoop](https://hub.docker.com/r/athlinks/hadoop/).
+The Docker Image 'imixs/hadoop' provides a Docker image to setup a single node hadoop cluster. This container can be used to test the hadoop [HttpFS Rest API](https://hadoop.apache.org/docs/current/hadoop-hdfs-httpfs/index.html). The image is based on the [official openjdk:8 Docker image](https://hub.docker.com/r/_/openjdk/) and was inspired from [athlinks/hadoop](https://hub.docker.com/r/athlinks/hadoop/).
 
 The Docker Image 'imixs/hadoop' provides the following features:
 
@@ -8,7 +8,7 @@ The Docker Image 'imixs/hadoop' provides the following features:
 * inherit form official openJDK
 * runs hadoop with OpenJDK 8
 * starts a single node hadoop cluster
-* support WebHDFS Rest API
+* support HttpFS and WebHDFS Rest API
 * installation path: /opt/hadoop 
 * linux user: hduser
 * data volume /data/hdfs/
@@ -16,12 +16,33 @@ The Docker Image 'imixs/hadoop' provides the following features:
 **NOTE:**
 This Docker image is for test purpose only. The container should only run in a system environment protected from external access. For that reason no kerberos security module is part of this image.
 
-## WebHDFS – Rest API
+## The Rest API
 
-Apache Hadoop provides a high performance native protocol for accessing HDFS. While this is great for Hadoop applications running inside a Hadoop cluster, external applications typically need to connect to HDFS from the outside. Using the native HDFS protocol means installing Hadoop and a Java binding with those applications. To access the hadoop cluster without these libraries a standard RESTful mechanism, called WebHDFS can be used. As part of this, WebHDFS takes advantages of the parallelism that a Hadoop cluster offers. Further, WebHDFS retains the security that the native Hadoop protocol offers. It also fits well into the overall strategy of providing web services access to all Hadoop components. Read also the official documentation of the Hadoop [WebHDFS REST API](https://hadoop.apache.org/docs/r2.8.0/hadoop-project-dist/hadoop-hdfs/WebHDFS.html).
+Apache Hadoop provides a high performance native protocol for accessing HDFS. While this is great for Hadoop applications running inside a Hadoop cluster, external applications typically need to connect to HDFS from the outside. Using the native HDFS protocol means installing Hadoop and a Java binding with those applications. To access the hadoop cluster without these libraries a standard RESTful mechanism can be used.
 
-{Imixs-Archive](https://github.com/imixs/imixs-archive) is based on the WebHDFS Rest API: 
+### WebHDFS 
+As part of the hadoop standard REST API the WebHDFS takes advantages of the parallelism that a Hadoop cluster offers. 
+Further, WebHDFS retains the security that the native Hadoop protocol offers. It also fits well into the overall strategy of providing web services access to all Hadoop components. Read also the official documentation of the Hadoop [WebHDFS REST API](https://hadoop.apache.org/docs/r2.8.0/hadoop-project-dist/hadoop-hdfs/WebHDFS.html).
 
+The WebHDFS API is accessible through the default port 50075.
+
+### HttpFS 
+As the WebHDFS API need access to the namenode as also to all datanodes within a hadoop cluster, the HttpFS Rest API provides a REST HTTP gateway supporting all HDFS File System operations (read and write) from a dedicated proxy server. HttpFS is interoperable with the webhdfs REST HTTP API. The HttpFS API is accessible through the default port 14000. As HttpFS runs on a separate server, 
+
+The HttpFS API is accessible through the default port 14000.
+
+- HttpFS can be used to transfer data between clusters running different versions of Hadoop (overcoming RPC versioning issues), for example using Hadoop DistCP.
+
+- HttpFS can be used to access data in HDFS on a cluster behind of a firewall as the HttpFS server acts as a gateway and may be the only system that is allowed to cross the firewall into the cluster.
+
+- HttpFS can be used to access data in HDFS using HTTP utilities (such as curl and wget) and HTTP libraries Perl from other languages than Java.
+
+- The webhdfs client FileSystem implementation can be used to access HttpFS using the Hadoop filesystem command (hadoop fs) line tool as well as from Java applications using the Hadoop FileSystem Java API.
+
+- HttpFS has built-in security supporting Hadoop pseudo authentication and HTTP SPNEGO Kerberos and other pluggable authentication mechanisms. It also provides Hadoop proxy user support.
+
+
+**Note:** {Imixs-Archive](https://github.com/imixs/imixs-archive) supports the HttpFS Rest API on port 14000 as well the Webhdfs API on port 50075. 
 
 # 1. Install Docker
 Follow the [Docker installation instructions](https://docs.docker.com/engine/installation/) for your host system.
@@ -29,15 +50,15 @@ Follow the [Docker installation instructions](https://docs.docker.com/engine/ins
 # 2. Running and stopping a container
 The container includes a start script running a namenode and a datanode. The container can be started with the following Docker run command:
 
-    docker run --name="hadoop" -d -h my-hadoop-cluster.local -p 9000:9000 -p 50070:50070 -p 50075:50075  imixs/hadoop
+    docker run --name="hadoop" -d -p 9000:9000 -p 50070:50070 -p 14000:14000  imixs/hadoop
 
-Thie docker container can be access via the WebHDFS Rest API as also the Hadoop Web Client. 
-When the container is started the first time, it automatically formats a Docker data volume for the hadoop filesystem HDFS. To restart an existing contaienr run the command:
+The docker container can be access via the WebHDFS Rest API as also the Hadoop Web Client. 
+When the container is started the first time, it automatically formats a Docker data volume for the hadoop filesystem HDFS. To restart an existing container run the command:
 
 	docker start hadoop
     
 **NOTE:** 
-The option "-h my-hadoop-cluster.local" defines a host name for the running container. This hostname is important as the WebHDFS will redirect to the datanode with this host name. You should define this host name in your client test environment.
+The option "-h hadoop.local" defines a host name for the running container. This hostname is important as the WebHDFS will redirect to the datanode with this host name. You should define this host name in your client test environment.
 
 
 ### Log Files
@@ -65,49 +86,26 @@ To test the hadoop file system, first start a bash in the running container:
 
 	docker exec -it hadoop /bin/bash	
 
-Next create and read a test file:
+Now from the docker console you can create and read a test file:
 
-	root@my-hadoop-cluster:/opt# echo "Hello Hadoop :-)" > test.txt
-	root@my-hadoop-cluster:/opt# hdfs dfs -copyFromLocal test.txt /
-	root@my-hadoop-cluster:/opt# hdfs dfs -ls /
+	echo "Hello Hadoop :-)" > test.txt
+	hdfs dfs -copyFromLocal test.txt /
+	hdfs dfs -ls /
+
+You will see the output in the hadoop log file and the new created file.
+
 	Found 1 items
 	-rw-r--r--   1 root supergroup         18 2017-06-28 21:45 /test.txt
 	
-You will see the output in the hadoop log file and the new created file.
 
 
 ## Testing the WebHDFS Rest API
 
-To test the Rest API you can run the culr command from inside the container:
+To test the Rest API you can run the culr command from outside the container:
 
-	curl -i -L "http://localhost:50070/webhdfs/v1/test.txt?op=OPEN"
 
-This curl command follows the Temporary Redirect response to a datanode and obtains the file data with the following response:
-
-	HTTP/1.1 307 TEMPORARY_REDIRECT
-	Cache-Control: no-cache
-	Expires: Wed, 28 Jun 2017 20:56:28 GMT
-	Date: Wed, 28 Jun 2017 20:56:28 GMT
-	Pragma: no-cache
-	Expires: Wed, 28 Jun 2017 20:56:28 GMT
-	Date: Wed, 28 Jun 2017 20:56:28 GMT
-	Pragma: no-cache
-	Content-Type: application/octet-stream
-	X-FRAME-OPTIONS: SAMEORIGIN
-	Location: http://my-hadoop-cluster:50075/webhdfs/v1/test.log?op=OPEN&namenoderpcaddress=localhost:8020&offset=0
-	Content-Length: 0
-	Server: Jetty(6.1.26)
-	
-	HTTP/1.1 200 OK
-	Access-Control-Allow-Methods: GET
-	Access-Control-Allow-Origin: *
-	Content-Type: application/octet-stream
-	Connection: close
-	Content-Length: 17
-	
-	Hello Hadoop :-)
-	root@my-hadoop-cluster:/opt# 
-
+	curl -sS 'http://hadoop.local:14000/webhdfs/v1/test.txt?op=OPEN&user.name=root'
+	>Hello Hadoop :-)
 
 
 

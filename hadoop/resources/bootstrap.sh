@@ -19,6 +19,11 @@ fi
 echo "Starting Hadoop DFS...."
 $HADOOP_HOME/sbin/start-dfs.sh
 
+
+# start hadoop HttpFS
+echo "Starting Hadoop HttpFS...."
+$HADOOP_HOME/sbin/httpfs.sh start
+
 echo "Hadoop Startup completed" 
 # keep running in the foreground
 tail -f $HADOOP_HOME/logs/*

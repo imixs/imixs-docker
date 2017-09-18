@@ -99,6 +99,6 @@ VOLUME /data/hdfs
 # TODO: we can't yet start hadoop as user hduser
 USER root
 
-EXPOSE 9000 50070 50075 
+EXPOSE 9000 50070 50075 14000
 
 CMD ["/etc/bootstrap.sh", "-d"]
