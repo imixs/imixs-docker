@@ -42,7 +42,7 @@ The HttpFS API is accessible through the default port 14000.
 - HttpFS has built-in security supporting Hadoop pseudo authentication and HTTP SPNEGO Kerberos and other pluggable authentication mechanisms. It also provides Hadoop proxy user support.
 
 
-**Note:** Imixs/Hadoop supports the HttpFS Rest API on port 14000 as also the Webhdfs API on port 50075. 
+**Note:** Imixs/Hadoop supports the HttpFS Rest API on port 14000 as also the Webhdfs API on port 50075. If Webhdfs is needed, a explizit hostame must be defined when starting the docker container. This is to support the redirect mechanism to the datanode! (run option '-h hadoop.local') 
 
 # 1. Install Docker
 Follow the [Docker installation instructions](https://docs.docker.com/engine/installation/) for your host system.
