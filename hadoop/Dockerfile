@@ -5,7 +5,7 @@ MAINTAINER ralph.soika@imixs.com
 
 USER root
 
-ENV HADOOP_VERSION=2.8.1
+ENV HADOOP_VERSION=3.0.0-beta1
 
 # Create the 'hduser' user and group 'hadoop' used to launch processes
 # The uid and gid will be set to 901 to avoid conflicts with offical users on the docker host.
