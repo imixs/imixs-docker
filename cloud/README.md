@@ -3,22 +3,110 @@
 Imixs-Docker-Cloud is a conceptual project that describes a way to create a Docker infrastructure for business applications.
 The main objective of this project is to focus on **simplicity** and **transparency**. The concept can be further developed. 
 
-## General
+The general idea is to setup a docker based infrastructure for Imixs-Workflow applications in a fast and easy way. We use Docker as the main infrastructure component and name these infrastructure 'Imixs-Docker-Cloud'. 
 
-The general idea is to setup a docker based infrastructure for Imixs-Workflow applications in a fast and easy way. We use Docker as the main infrastructure component. 
+## Rules
+ 1. _A Imixs-Docker-Cloud can be setup on any hardware_
+ 2. _All applications running in the cloud can be accessed through a proxy server which is part of the cloud._
+ 3. _Busness applications can be started and stopped independent from each other by separate Docker containers._
+ 4. _A Docker-Registry and a Databaseserver is not part of the cloud._  
+ 
+# User-Defined-Networks
 
-### Rule
-Docker containers can be started and stopped independent from each other. 
+Imixs-Docker-Cloud uses [User-Defined-Networks](https://docs.docker.com/engine/userguide/networking/#user-defined-networks)
+
+It is recommended to use user-defined bridge networks to control which containers can communicate with each other, and also to enable automatic DNS resolution of container names to IP addresses. 
+
+The Imixs-Cloud network can be created with the following command on the docker host:
+
+	$ docker network create --driver bridge imixs_cloud_nw
+
+To see the current configuration of the network run:
+
+	$ docker network inspect imixs_cloud_nw
+	
+List all networks: 
+
+	$ docker network ls
+
+After you create the network, you can launch containers on it using the docker option:
+
+	docker run --network=<NETWORK> 
+	
+The containers launched into this network must reside on the same Docker host. Each container in the network can immediately communicate with other containers in the network. Though, the network itself isolates the containers from external networks.
+Within a user-defined bridge network, linking is not supported and so not necessary. 
+Exposing ports of published containers is necessary only if a service must be available to an outside network. 
+In Imixs-Docker-Cloud this is only done for the proxy service. Inter-Container configuration works without additional configuration.
 
 
-# The Registry
 
-Public docker images are basically available on [Docker Hub](hub.docker.com). For private docker images a Docker Registry is used. A private registry is on part of this cloud concept. The registry can be hosted on any server and need not be part of the cloud itself. 
+
+
+# The Proxy
+
+To access business applications running in the cloud from the Internet a Revers-Proxy is used. The core functionality of this component is to dispatch requests to appropriate docker containers running in the cloud. The proxy is realized with a nginx Docker Container. 
+
+Nginx  operates as a reverse proxy and is launched in its own Docker container which is reachable via port 80. The reverse proxy  redirects the requests to the respective Wildfly container.
+
+The Github Project [jwilder/nginx-proxy](https://github.com/jwilder/nginx-proxy) provides a docker image with nginx and automatically generates reverse proxy configs for nginx and reloads nginx when containers are started and stopped.
+
+
+
+## Rules: 
+
+
+
+
+
+# Databases
+
+We use mysql or posgres as RDMS to provide databases. 
+
+## Rules:
+
+ * The database container includes a FTP Backup Cron job
+ * The database container provides scripts to restore from regular or snapshot backups
+
+
+See: https://github.com/yloeffler/mysql-backup
+
+
+
+# The Docker-Registry
+
+Public docker images are basically available on [Docker Hub](hub.docker.com). For private docker images a Docker Registry is used. A private registry is not a mandatory part of this cloud concept. The registry can be hosted on any server outside of the cloud itself. 
 
 The goal is to push locally build docker images to the docker registry, so that the cloud infrastructure can pull those images without the need to build the images from a Docker file. 
 
+## Rules:
 
-## How To Setup
+ * _A registry is not running in the cloud and can be installed anywhere. The registry is a repository like a code repository and should be handled like this._ 
+
+
+## How to Connect a Registry
+
+So the final question is how to connect a private Docker Registry?. This can be done with TLS (see the section 'How to Setup a Private Docker Registry'). 
+
+To allow the cloud to pull images from a private registry, the cloud need the domain certificate. There for the certificate file “domain.cert” must be located on the cloud infrastructure  in a file
+
+	@local:$ /etc/docker/certs.d/<registry_address>/ca.cert
+
+Where <registry_address> is the server host name of the private registry including the port number. For example:
+
+	/etc/docker/certs.d/dock01:5000/ca.cert
+
+After the certificate was updated you need to restart the local docker daemon:
+
+	@local:$ mkdir -p /etc/docker/certs.d/dock01:5000 
+	@local:$ cp domain.cert /etc/docker/certs.d/dock01:5000/ca.crt
+	@local:$ service docker restart
+
+Now the private registry is available to the cloud.
+
+
+
+
+## How to Setup a Private Docker Registry
 
 A docker registry can easily be started with the official Docker image ‘registry:2’. 
 
@@ -79,7 +167,7 @@ Now again you can push your local image into the new registry:
 
 	@dock01:$ docker push localhost:5000/proxy:1.0.0
 
-###Access the Remote Registry form a local Client
+### Access the Remote Registry form a local Client
 
 Now as the private registry is started with TLS Support you can access the registry from any client which has the domain certificate.
 
@@ -123,17 +211,6 @@ https://yourserver.com:5000/v2/_catalog
 
 
 
-
-
-
-
-
-
- 
-
-# The Proxy
-
-To access applications running in the cloud from the Internet a Revers-Proxy is used. The core functionality of this component is to dispatch requests to appropriate docker containers running in the cloud.
 
 
 
