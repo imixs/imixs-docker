@@ -35,22 +35,49 @@ After you create the network, you can launch containers on it using the docker o
 	
 The containers launched into this network must reside on the same Docker host. Each container in the network can immediately communicate with other containers in the network. Though, the network itself isolates the containers from external networks.
 Within a user-defined bridge network, linking is not supported and so not necessary. 
-Exposing ports of published containers is necessary only if a service must be available to an outside network. 
-In Imixs-Docker-Cloud this is only done for the proxy service. Inter-Container configuration works without additional configuration.
+Exposing ports of published containers is necessary only if a service must be available to an outside network which is not the case for the imixs-docker-cloud. 
+So in Imixs-Docker-Cloud only the port 80 for the proxy service is exposed. Inter-Container configuration works without additional configuration.
 
 
 
+
+## Compose 
+By default Docker Compose sets up a single network for each app. Each container for a service joins the default network and is both reachable by other containers on that network, and discoverable by them at a hostname identical to the container name.
+To tell compose to use the imixs-cloud network the following additional entry need to be added into the docker-compose.yml file
+
+
+	version: '3'
+	
+	services:
+	....
+	
+	networks:
+	  imixs_cloud_nw:
+	    driver: bridge
+ 
 
 
 # The Proxy
 
-To access business applications running in the cloud from the Internet a Revers-Proxy is used. The core functionality of this component is to dispatch requests to appropriate docker containers running in the cloud. The proxy is realized with a nginx Docker Container. 
+To access business applications running in the cloud from the Internet a Reverse-Proxy is used. The core functionality of this component is to dispatch requests to appropriate docker containers running in the cloud.  The reverse proxy  redirects the requests to the respective Wildfly container. 
 
-Nginx  operates as a reverse proxy and is launched in its own Docker container which is reachable via port 80. The reverse proxy  redirects the requests to the respective Wildfly container.
+The proxy service can be realized with a nginx oir traefik.io. 
+
+## Nginx
+Nginx is a web server which alos can operate as a reverse proxy. It can be launched in its own Docker container which is reachable via port 80.
 
 The Github Project [jwilder/nginx-proxy](https://github.com/jwilder/nginx-proxy) provides a docker image with nginx and automatically generates reverse proxy configs for nginx and reloads nginx when containers are started and stopped.
 
+## traefik.io
+Træfik is a pure HTTP reverse proxy and load balancer. It  manages it configuration automatically and dynamically by scanning events from the backend services like "Docker", "Docker Swarm" and also "Rancher". 
 
+The folder /trafik contains a docker-compose.yml file to start trafik with the following command:
+
+	docker-compose up
+
+The trafik container is using the network 'imixs\_cloud\_nw', which need to be created first (see above)
+
+All docker containers started in the same network as the trafik container are accessable via port 80 by trafik. 
 
 ## Rules: 
 
