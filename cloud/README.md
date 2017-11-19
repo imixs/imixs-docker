@@ -51,11 +51,12 @@ To tell compose to use the imixs-cloud network the following additional entry ne
 	services:
 	....
 	
-	networks:
-	  imixs_cloud_nw:
-	    driver: bridge
- 
+    networks:
+	  default:
+	    external:
+	      name: imixs_cloud_nw
 
+In this configuration the external network 'imixs\_cloud\_nw' must exist before the services defined in the compose file are started. 
 
 # The Proxy
 
