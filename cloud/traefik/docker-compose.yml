@@ -3,13 +3,13 @@ version: "3"
 services:
   proxy:
     image: traefik
-    command: --web --docker --docker.domain=docker.localhost --logLevel=DEBUG
     ports:
       - "80:80"
-      - "8081:8080"
+      - "8100:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /dev/null:/traefik.toml
+      - $PWD/traefik.toml:/etc/traefik/traefik.toml
+      - $PWD/.htpasswd:/etc/traefik/.htpasswd
 
 networks:
   default:
