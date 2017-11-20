@@ -1,4 +1,6 @@
-# Traefik Configuration
+# Traefik 
+
+Træfik is a pure HTTP reverse proxy and load balancer. It  manages it configuration automatically and dynamically by scanning events from the backend services like "Docker", "Docker Swarm" and also "Rancher". The following section gives an overview how Traefik is used in the imixs-docker-cloud.
 
 Traefik can be started by docker-compose:
 
@@ -7,13 +9,12 @@ Traefik can be started by docker-compose:
 The docker-compose.yml file includes the port mapping, the external network and the mounted configuration files.
 
 
-The traefik.toml file includes the configuration settings as is mounted by the docker-compose.yml file into the container directory /etc/traefik/
-
 ## Configuration
+The traefik.toml file includes the configuration settings for Traefik and is mounted by the docker-compose.yml file into the container directory /etc/traefik/
 
 ### Network Configuration
 
-It is important that the Traefik container and all containers which should by proxied by traefik are started within the same network. This means for the docker run command:
+It is important that the Traefik container and all containers which should by proxied by Traefik are started within the same network. This means for the docker run command:
 
 	docker run --network=<NETWORK> .....
 
