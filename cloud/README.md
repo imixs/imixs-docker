@@ -5,7 +5,7 @@ The main objective of this project is to focus on **simplicity** and **transpare
 
 The general idea is to setup a docker based infrastructure for Imixs-Workflow applications in a fast and easy way. We use Docker as the main infrastructure component and name these infrastructure 'Imixs-Docker-Cloud'. 
 
-[traefik](./traefik.README.md)
+[traefik](traefik/README.md)
 
 ## Rules
  1. _A Imixs-Docker-Cloud can be setup on any hardware_
