@@ -1,57 +1,53 @@
-# Traefik 
+# The HTTP Reverse Proxy – traefik.io
 
-Træfik is a pure HTTP reverse proxy and load balancer. It  manages it configuration automatically and dynamically by scanning events from the backend services like "Docker", "Docker Swarm" and also "Rancher". The following section gives an overview how Traefik is used in the imixs-docker-cloud.
+A HTTP reverse proxy is used to hide our services from the internet. In addition the proxy also acts as a load balancer to be used if you need to scale your application over several nodes.
 
-Traefik can be started by docker-compose:
+[traefik.io](traefik.io) is a reverse proxy with a nice UI. To deploy traefik into the environment first create an overlay network for traefik to use.
 
-    docker-compose up
+	docker-machine ssh manager1 "docker network create --driver=overlay traefik-net"
 
-The docker-compose.yml file includes the port mapping, the external network and the mounted configuration files.
+This network will be later used to start new services to be reached through the traefik proxy service.
 
+To start traefil in this network run:
 
-## Configuration
-The traefik.toml file includes the configuration settings for Traefik and is mounted by the docker-compose.yml file into the container directory /etc/traefik/
+	docker-machine ssh manager1 "docker service create \
+	    --name traefik \
+	    --constraint=node.role==manager \
+	    --publish 80:80 \
+	    --publish 8080:8080 \
+	    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+	    --network traefik-net \
+	    traefik:v1.4.4 \
+	    -l DEBUG \
+	    --docker \
+	    --docker.swarmmode \
+	    --docker.domain=traefik \
+	    --docker.watch \
+	    --web"
 
-### Network Configuration
+After traefik is stared you can access the web UI via port 8080
 
-It is important that the Traefik container and all containers which should by proxied by Traefik are started within the same network. This means for the docker run command:
+	http://192.168.99.100:8080
 
-	docker run --network=<NETWORK> .....
+Now you can start deploying web applications into the swarm within the network traefik-net. Those applications will be accessible via the traefik proxy server. To test the proxy you can deploy a simple test service /emilevauge/whoami . This docker container simply displays the location of itself.
 
-and for docker-compose.yml files the corresponding networks entry:
+	docker-machine ssh manager1 "docker service create \
+	    --name whoami1 \
+	    --label traefik.port=80 \
+	    --network traefik-net \
+	    --label traefik.frontend.rule=Host:whoami.local\
+	    emilevauge/whoami"
 
-	...
-	networks:
-	  default:
-	    external:
-	      name: imixs_cloud_nw
+In this example the label traefik.frontend.rule=Host:whoami.local is a local dns name under which the application can be accessed. When you open the traefik frontend, the new service will be listed:
 
+	http://192.168.99.100:8080
 
-### Web Frontend Configuration
+If you have added the DNS entry into your local hosts file pointing to the machine manager1 (192.168.99.100), the web application can be opend from this URL:
 
-The Traefik web front-end listens internally on port 8080 and is secured by basic authentication:
+	http://whoami.local/
+	
+## HTTPS with Let’s encrypt
 
+Traefik will automatically detect new containers starting in the swarm and provides a front end domain on HTTP port 80 or HTTPS 443. For HTTPS you can easily install certificates with Let’s encrypt.
 
-	[web]
-	  address = ":8080"
-		[web.auth.basic]
-		usersFile = "/etc/traefik/.htpasswd" 
-
-	  
-The password can be created from a linux console with the following command:
-
-	htpasswd -c .htpasswd admin
-
-This will create the corresponding user/password entry in the a file named '.htpasswd'. The file will be created if not exists.
-The .htpasswd file must be mounted into the container directory /etc/traefik/
-
-Find details about the web configuration [here](http://docs.traefik.io/configuration/backends/web/).
-
-**Note:** The Traefik web frontend is usually mapped to port 8080. As this port is also used by wildfly we map the port 8080 from Traefik to the port 8100. 
-Run the frontend from your web browser via:
-
-[http://localhost:8100/](http://localhost:8100/)
-
-
-
-
+ 

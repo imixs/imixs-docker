@@ -5,110 +5,174 @@ The main objective of this project is to focus on **simplicity** and **transpare
 
 The general idea is to setup a docker based infrastructure for Imixs-Workflow applications in a fast and easy way. We use Docker as the main infrastructure component and name these infrastructure 'Imixs-Docker-Cloud'. 
 
+[traefik](./traefik.README.md)
+
 ## Rules
  1. _A Imixs-Docker-Cloud can be setup on any hardware_
  2. _All applications running in the cloud can be accessed through a proxy server which is part of the cloud._
  3. _Busness applications can be started and stopped independent from each other by separate Docker containers._
  4. _A Docker-Registry and a Databaseserver is not part of the cloud._  
+
+
+## Basic Architecture
+
+The basic architecture of the Imixs-Docker-Cloud consists of the following components:
+
+ * A Docker Host running a Reverse-Proxy Container to dispatch requests (listening on port 80)
+ * A Docker-Swarm manager node (typically running on the same machine as the Reverse-Proxy)
+ * One or many Docker-Swarm Worker Nodes, running the applications 
+
  
-# User-Defined-Networks
+# Docker-Swarm
 
-Imixs-Docker-Cloud uses [User-Defined-Networks](https://docs.docker.com/engine/userguide/networking/#user-defined-networks)
+[Docker-Swarm](https://docs.docker.com/engine/swarm/) is used to setup the cluster of docker hosts to run the applications in docker-containers. See the [Swarm mode key concepts](https://docs.docker.com/engine/swarm/key-concepts/) for details. 
 
-It is recommended to use user-defined bridge networks to control which containers can communicate with each other, and also to enable automatic DNS resolution of container names to IP addresses. 
+With Docker-Swarm containers will be distributed on the available nodes in the swarm cluster and tries to mostly get an even distribution of containers on all available nodes.
+Docker swarm does not check the resources (memory, cpu ...) available on the nodes before deploying a container on it. The distribution of containers is balanced per nodes, without taking into account the availability of resources on each node. 
 
-The Imixs-Cloud network can be created with the following command on the docker host:
+However its possible to build a strategy of distributing containers on the nodes. You can use [placement constraints](https://docs.docker.com/compose/compose-file/#placement) were you can restrict where a container can be deployed. You can label nodes having a lot of resources and restrict some heavy containers to only run on specific nodes.
+If a container crashes, docker swarm will ensure that a new container is started. Again, the decision of what node to deploy the new container on cannot be predetermined.
 
-	$ docker network create --driver bridge imixs_cloud_nw
+See the following tutorial how to setup a Docker-Swarm:
 
-To see the current configuration of the network run:
+* [Docker-Swarm tutorial](https://docs.docker.com/engine/swarm/swarm-tutorial/)
+* [Lightweight Docker Swarm Environment by Ralph Soika](http://ralph.soika.com/lightweight-docker-swarm-environment/)
 
-	$ docker network inspect imixs_cloud_nw
+## Rules
+
+ 1. All containers are started as services to run in the swarm.
+ 2. Use the Docker CLI to create a swarm, deploy application services to a swarm, and manage swarm behavior.
+ 3. The Proxy Container is configured to run  exclusively on the manager-only nodes.   Or the proxy can be run as a  global service, which 
+ means, that swarm runs one task for this service on every available node in the cluster.
+ 
+ 
+----------------------- IN BLOG ÜBERTRAGEN START -----------------------------------------
+ 
+# The Docker-Registry
+
+Public docker images are basically available on [Docker Hub](hub.docker.com). For private docker images a Docker Registry is used. A private registry is a mandatory part of this cloud concept. The registry is hosted on the docker-swarm manager. 
+
+The goal is to push locally build docker images to the docker registry, so that the cloud infrastructure can pull and start those services without the need to build the images from a Docker file. 
+
+## How to Setup
+The following section will show how to setup the private registry with TLS (Transport Layer Security).
+
+
+
+### Create a Self Signed Certificate
+
+To secure the registry we create a self signed certificate on the manager1 server to be used for the private Docker Registry.
+
+First you can easily create a certificate with the OpenSSL-Tool locally.
+
+
+	$ mkdir ./registry && cd ./registry
+	$ openssl req -newkey rsa:4096 -nodes -sha256 \
+                -keyout domain.key -x509 -days 356 \
+                -out domain.cert
+                Generating a 4096 bit RSA private key
+	................................................++
+	writing new private key to 'registry_certs/domain.key'
+	-----
+	You are about to be asked to enter information that will be incorporated
+	into your certificate request.
+	What you are about to enter is what is called a Distinguished Name or a DN.
+	There are quite a few fields but you can leave some blank
+	For some fields there will be a default value,
+	If you enter '.', the field will be left blank.
+	-----
+	Country Name (2 letter code) [AU]:DE
+	State or Province Name (full name) [Some-State]:
+	Locality Name (eg, city) []: 
+	Organization Name (eg, company) [Internet Widgits Pty Ltd]: 
+	Organizational Unit Name (eg, section) []:
+	Common Name (e.g. server FQDN or YOUR name) []:192.168.99.100
+	Email Address []:
 	
-List all networks: 
 
-	$ docker network ls
 
-After you create the network, you can launch containers on it using the docker option:
+Here I created a x509 certificate and a private RSA key. The ‘Common Name’ here is important as this is the server host name. In this example I use the IP address of machine 'manager1' (192.168.99.100), but in production you would use a internet domain name. 
 
-	docker run --network=<NETWORK> 
-	
-The containers launched into this network must reside on the same Docker host. Each container in the network can immediately communicate with other containers in the network. Though, the network itself isolates the containers from external networks.
-Within a user-defined bridge network, linking is not supported and so not necessary. 
-Exposing ports of published containers is necessary only if a service must be available to an outside network which is not the case for the imixs-docker-cloud. 
-So in Imixs-Docker-Cloud only the port 80 for the proxy service is exposed. Inter-Container configuration works without additional configuration.
+Finally you have two files:
+
+    domain.cert – this file can be handled to the client using the private registry
+    domain.key – this is the private key which is necessary to run the private registry with TLS
 
 
 
+Next you can copy the certificate files to the manager1 into the folder 'registry_certs':
 
-## Compose 
-By default Docker Compose sets up a single network for each app. Each container for a service joins the default network and is both reachable by other containers on that network, and discoverable by them at a hostname identical to the container name.
-To tell compose to use the imixs-cloud network the following additional entry need to be added into the docker-compose.yml file
+	$ docker-machine ssh manager1 "mkdir ./registry/certs"
+	$ docker-machine scp domain.cert manager1:./registry/certs/
+	$ docker-machine scp domain.key manager1:./registry/certs/
 
+
+Create a docker-compose.yml file with the following content:
 
 	version: '3'
 	
 	services:
-	....
+	 app:
+	   image: registry:2
+	   environment:
+	     REGISTRY_HTTP_TLS_CERTIFICATE: /certs/domain.cert 
+	     REGISTRY_HTTP_TLS_KEY: /certs/domain.key
+	   volumes:
+         - ~/registry/certs:/certs   
+	   ports:
+	     - 5000:5000
+	   networks:
+	     - net
+	   deploy:
+	     placement:
+	       constraints:
+	         - node.role == manager
+	networks:
+	   net:
+	     driver: overlay
+
+
+copy the docker-compose.yml file into manager1
+
+	$ docker-machine scp docker-compose.yml manager1:./registry/
+
+Now you can start the registry with :
+
+	docker-machine ssh manager1 "docker stack deploy -c registry/docker-compose.yml registry"
 	
-    networks:
-	  default:
-	    external:
-	      name: imixs_cloud_nw
+The local registry is now available under the address:
 
-In this configuration the external network 'imixs\_cloud\_nw' must exist before the services defined in the compose file are started. 
+	https://192.168.99.100:5000	
+	
+You can check the registry API via:
 
-# The Proxy
+	https://192.168.99.100:5000/v2/
 
-To access business applications running in the cloud from the Internet a Reverse-Proxy is used. The core functionality of this component is to dispatch requests to appropriate docker containers running in the cloud.  The reverse proxy  redirects the requests to the respective Wildfly container. 
 
-The proxy service can be realized with a nginx oir traefik.io. 
+### Push a local image
 
-## Nginx
-Nginx is a web server which alos can operate as a reverse proxy. It can be launched in its own Docker container which is reachable via port 80.
+After the registry was started you can push a local image into the registry. The following example pushes the traefik image:
 
-The Github Project [jwilder/nginx-proxy](https://github.com/jwilder/nginx-proxy) provides a docker image with nginx and automatically generates reverse proxy configs for nginx and reloads nginx when containers are started and stopped.
 
-## traefik.io
-Træfik is a pure HTTP reverse proxy and load balancer. It  manages it configuration automatically and dynamically by scanning events from the backend services like "Docker", "Docker Swarm" and also "Rancher". 
+	$ docker tag traefik:latest 192.168.99.100:5000/traefik:latest
+	$ docker push 192.168.99.100:5000/traefik:latest
+	The push refers to a repository [192.168.99.100:5000/traefik]
+	Get https://192.168.99.100:5000/v2/: x509: cannot validate certificate for 192.168.99.100 because it doesn't contain any IP SANs
 
-The folder /trafik contains a docker-compose.yml file to start trafik with the following command:
+As you can see in the error message, the push failed because of the missing certificate installed on your local machine. 
+To fix this copy the certificate into the docker certs.d directory and restart your local docker service
 
-	docker-compose up
 
-The trafik container is using the network 'imixs\_cloud\_nw', which need to be created first (see above)
+	$ mkdir -p /etc/docker/certs.d/192.168.99.100:5000 
+	$ cp domain.cert /etc/docker/certs.d/192.168.99.100:5000/ca.crt
+	$ service docker restart
 
-All docker containers started in the same network as the trafik container are accessable via port 80 by trafik. 
-
-## Rules: 
+Note: it can be that the certificate is not accepted because it's based on IP only. In this case you should create a certificate for a local existing domain name (e.g. local.manager1). 
 
 
 
+----------------------- IN BLOG ÜBERTRAGEN ENDE -----------------------------------------
 
-
-# Databases
-
-We use mysql or posgres as RDMS to provide databases. 
-
-## Rules:
-
- * The database container includes a FTP Backup Cron job
- * The database container provides scripts to restore from regular or snapshot backups
-
-
-See: https://github.com/yloeffler/mysql-backup
-
-
-
-# The Docker-Registry
-
-Public docker images are basically available on [Docker Hub](hub.docker.com). For private docker images a Docker Registry is used. A private registry is not a mandatory part of this cloud concept. The registry can be hosted on any server outside of the cloud itself. 
-
-The goal is to push locally build docker images to the docker registry, so that the cloud infrastructure can pull those images without the need to build the images from a Docker file. 
-
-## Rules:
-
- * _A registry is not running in the cloud and can be installed anywhere. The registry is a repository like a code repository and should be handled like this._ 
 
 
 ## How to Connect a Registry
@@ -225,6 +289,134 @@ https://yourserver.com:5000/v2/_catalog
 
 
 
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+# Deprecated Sections
+
+
+
+
+
+
+
+
+
+# User-Defined-Networks
+
+Imixs-Docker-Cloud uses [User-Defined-Networks](https://docs.docker.com/engine/userguide/networking/#user-defined-networks)
+
+It is recommended to use user-defined bridge networks to control which containers can communicate with each other, and also to enable automatic DNS resolution of container names to IP addresses. 
+
+The Imixs-Cloud network can be created with the following command on the docker host:
+
+	$ docker network create --driver bridge imixs_cloud_nw
+
+To see the current configuration of the network run:
+
+	$ docker network inspect imixs_cloud_nw
+	
+List all networks: 
+
+	$ docker network ls
+
+After you create the network, you can launch containers on it using the docker option:
+
+	docker run --network=<NETWORK> 
+	
+The containers launched into this network must reside on the same Docker host. Each container in the network can immediately communicate with other containers in the network. Though, the network itself isolates the containers from external networks.
+Within a user-defined bridge network, linking is not supported and so not necessary. 
+Exposing ports of published containers is necessary only if a service must be available to an outside network which is not the case for the imixs-docker-cloud. 
+So in Imixs-Docker-Cloud only the port 80 for the proxy service is exposed. Inter-Container configuration works without additional configuration.
+
+
+
+
+## Compose 
+By default Docker Compose sets up a single network for each app. Each container for a service joins the default network and is both reachable by other containers on that network, and discoverable by them at a hostname identical to the container name.
+To tell compose to use the imixs-cloud network the following additional entry need to be added into the docker-compose.yml file
+
+
+	version: '3'
+	
+	services:
+	....
+	
+    networks:
+	  default:
+	    external:
+	      name: imixs_cloud_nw
+
+In this configuration the external network 'imixs\_cloud\_nw' must exist before the services defined in the compose file are started. 
+
+
+
+
+# The Proxy
+
+To access business applications running in the cloud from the Internet a Reverse-Proxy is used. The core functionality of this component is to dispatch requests to appropriate docker containers running in the cloud.  The reverse proxy  redirects the requests to the respective Wildfly container. 
+
+The proxy service can be realized with a nginx oir traefik.io. 
+
+## Nginx
+Nginx is a web server which alos can operate as a reverse proxy. It can be launched in its own Docker container which is reachable via port 80.
+
+The Github Project [jwilder/nginx-proxy](https://github.com/jwilder/nginx-proxy) provides a docker image with nginx and automatically generates reverse proxy configs for nginx and reloads nginx when containers are started and stopped.
+
+## traefik.io
+Træfik is a pure HTTP reverse proxy and load balancer. It  manages it configuration automatically and dynamically by scanning events from the backend services like "Docker", "Docker Swarm" and also "Rancher". 
+
+The folder /trafik contains a docker-compose.yml file to start trafik with the following command:
+
+	docker-compose up
+
+The trafik container is using the network 'imixs\_cloud\_nw', which need to be created first (see above)
+
+All docker containers started in the same network as the trafik container are accessable via port 80 by trafik. 
+See also the [Boxboat Blog](https://boxboat.com/2017/10/10/managing-multiple-microservices-with-traefik-in-docker-swarm/) for additional information how to run traefik in docker swarm mode. 
+
+## Rules: 
+
+
+
+
+
+# Databases
+
+We use mysql or posgres as RDMS to provide databases. 
+
+## Rules:
+
+ * The database container includes a FTP Backup Cron job
+ * The database container provides scripts to restore from regular or snapshot backups
+
+
+See: https://github.com/yloeffler/mysql-backup
+
+
+# Wildfly
+
+See: 
+
+!!!
+
+Clustering
+
+Our WildFly image uses the standalone.xml configuration file which is great, but not for the clustering purposes. Let's switch to standalone-ha.xml. This will enable the clustering features.
+* https://eldermoraes.wordpress.com/2017/01/10/building-a-wildfly-cluster-using-docker/
+
+
+* https://blog.couchbase.com/microservice-using-docker-stack-deploy-wildfly-javaee-couchbase/
+* https://goldmann.pl/blog/2013/10/07/wildfly-cluster-using-docker-on-fedora/
 
 
 
