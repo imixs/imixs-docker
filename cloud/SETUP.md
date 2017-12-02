@@ -2,7 +2,7 @@
 
 The following section describes the setup procedure of Imixs-Docker-Cloud with [Docker-Swarm](https://docs.docker.com/engine/swarm/) into a productive environment. 
 
-See the following tutorial how to setup a Docker-Swarm:
+Read the following tutorial for general information about how to setup a Docker-Swarm:
 
 * [Docker-Swarm tutorial](https://docs.docker.com/engine/swarm/swarm-tutorial/)
 * [Lightweight Docker Swarm Environment by Ralph Soika](http://ralph.soika.com/lightweight-docker-swarm-environment/)
