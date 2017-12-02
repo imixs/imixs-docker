@@ -10,7 +10,7 @@ services:
    ports:
      - 8200:8080
    networks:
-     - net
+     - imixs-cloud-net
    deploy:
      placement:
        constraints:
@@ -23,7 +23,7 @@ services:
      - net
 
 networks:
-   net:
+   imixs-cloud-net:
      driver: overlay
 
 volumes:

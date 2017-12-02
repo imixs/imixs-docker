@@ -9,15 +9,34 @@ See the following tutorial how to setup a Docker-Swarm:
 
 ## Hardware Nodes
 
-A Imixs-Docker-Cloud consits of a minimum of two nodes - a management-node and one worker-node. All nodes are defined by unique fixed IP-adresses and DNS names. Only the anager-node need to be accessible through the internet.   All nodes in the swarm must be able to access the manager at the IP address.
+A Imixs-Docker-Cloud consists of a minimum of two nodes - a management-node and one worker-node. All nodes are defined by unique fixed IP-adresses and DNS names. Only the manager-node need to be accessible through the internet. All nodes in the swarm must be able to access the manager at the IP address.
 
-### Open protocols and ports
+### Open networks, protocols and ports
 
 The following ports must be available on each node. 
 
  - TCP port 2377 for cluster management communications
  - TCP and UDP port 7946 for communication among nodes
  - UDP port 4789 for overlay network traffic
+ 
+The nodes communicate via two different overlay networks:
+
+ * imixs-cloud-network - used for the swarm 
+ * imixs-proxy-network - used by the reverse proxy
+ 
+To create the overlay networks on the manager-node run:
+
+	$ docker network create --driver=overlay imixs-cloud-net
+	$ docker network create --driver=overlay imixs-proxy-net
+
+The following ports are published to be accessable from the internet:
+
+
+ * 80 - The Reverse proxy endpoint 
+ * 8100 - The reverse proxy server UI traefik
+ * 8200 - The swarm management UI swarmpit
+ * 8300 - The imixs private registry
+
 
 ## Init the swarm manager
 
@@ -32,14 +51,14 @@ This command init the swarm and returns a pre-configured docker swarm join comma
 
 	$ docker swarm join --token SWMTKN-1-5acc79cslx83455zcobgkbfxth4t3133ts8s7a1vxap1vwud9-04n5qiicw4qopj3zk32jm5qay 192.168.99.100:2377
 	
-The IP address given here is the IP from the machine “manager1”.
+The IP address given here is the IP from the manager-node.
 
 To verify the nodes in a swarm run:
 
 	$ docker node ls
-	ID 								HOSTNAME 	STATUS 		AVAILABILITY 	MANAGER STATUS
-	niskvdwg4k4k1otrrnpzvgbdn * 	manager1 	Ready 		Active 			Leader
-	c54zgxn45bvogr78qp5q2vq2c 	worker1 	Ready 		Active 
+	ID				HOSTNAME 	STATUS 		AVAILABILITY 	MANAGER STATUS
+	niskvdwg4k4k1otrrnpzvgbdn * 	manager1	Ready 		Active 		Leader
+	c54zgxn45bvogr78qp5q2vq2c 	worker1		Ready 		Active 
 
 
 ### The Swarm UI – swarmpit.io
@@ -49,13 +68,12 @@ swarmpit.io is started as a service on the manager node. The configuration is de
 To start the service on the manager node:
 
 	$ docker stack deploy -c swarmpit/docker-compose.yml swarmpit
-	
 
 Note: It can take some minutes until swarmpit is started.
 
 After the swarmpit the front-end can be access on port 8200
 
-http://192.168.99.100:8200
+http://manager-node.com:8200
 
 The default userid is ‘admin’ with the password ‘admin’.
 
@@ -67,7 +85,7 @@ Docker images are available on docker registries. Public docker images are basic
 The registry is used to push locally build docker images so that the cloud infrastructure can pull and start those services without the need to build the images from a Docker file.
 
 ## Create a Self Signed Certificate
-The private registry in the Imixs-Docker-Cloud is secured with a TLS (Transport Layer Security). This guaranties that only authorized clients can push or pull an image from the registry.  To secure the registry, a self signed certificate for the host “manager1” is needed. 
+The private registry in the Imixs-Docker-Cloud is secured with a TLS (Transport Layer Security). This guaranties that only authorized clients can push or pull an image from the registry.  To secure the registry, a self signed certificate for the manager-node is needed. 
 
 To create the certificate a DNS host name for the manager-node:
 
@@ -92,10 +110,10 @@ To create the certificate a DNS host name for the manager-node:
 	Locality Name (eg, city) []: 
 	Organization Name (eg, company) [Internet Widgits Pty Ltd]: 
 	Organizational Unit Name (eg, section) []:
-	Common Name (e.g. server FQDN or YOUR name) []:manager1.local
+	Common Name (e.g. server FQDN or YOUR name) []:manager-node.com
 	Email Address []:
 
-In this examplea x509 certificate and a private RSA key is created with the DNS name (‘Common Name’) _manager1.local_.
+In this examplea x509 certificate and a private RSA key is created with the DNS name (‘Common Name’) _manager-node.com_.
 openssl creates two files:
 
 * domain.cert – this file can be handled to the client using the private registry
@@ -121,25 +139,25 @@ The service can be started with :
 
 	$ docker stack deploy -c registry/docker-compose.yml imixs-registry
 	
-The registry will be available under port 5000 of the manager-node.
+The registry will be available under port 8300 of the manager-node.
 
 You can check the registry API via the Rest API:
 
-	https://manager1.local:5000/v2/
+	https://manager-node.com:8300/v2/
 
 ### How to grant a Client
 To grant your local client to be allowed to push/pull images from the new private docker registry, a copy of the certificate need to be copied into the docker certs.d directory of local client and the docer service must be restart once:
 
 
-	$ mkdir -p /etc/docker/certs.d/manager1.local:5000
-	$ cp domain.cert /etc/docker/certs.d/manager1.local:5000/ca.crt
+	$ mkdir -p /etc/docker/certs.d/manager-node.como:8300
+	$ cp domain.cert /etc/docker/certs.d/manager-node.com:8300/ca.crt
 	$ service docker restart
 
 To push a local image from a client into the registry the image must be taged first:
 
-	$ docker tag swarmpit/swarmpit:1.2 manager1.local:5000/swarmpit/swarmpit:1.2
-	$ docker push manager1.local:5000/swarmpit/swarmpit:1.2
-	The push refers to a repository [manager1.local:5000/swarmpit/swarmpit]
+	$ docker tag swarmpit/swarmpit:1.2 manager-node.com:8300/swarmpit/swarmpit:1.2
+	$ docker push manager-node.com:8300/swarmpit/swarmpit:1.2
+	The push refers to a repository [manager-node.com:8300/swarmpit/swarmpit]
 	6afcf119ad8f: Pushed 
 	830626953b30: Pushed 
 	a1e7033f082e: Pushed 
@@ -148,7 +166,7 @@ To push a local image from a client into the registry the image must be taged fi
 	1.2: digest: sha256:2ec2c601c936c904aba991a8a2f0961b2382e6c0483fbec1997896e7422030ab size: 1366
 
 
-The private registry can also be added into swarmpit -  “Registry -> NEW REGISTRY“. Add the URL “https://192.168.99.100:5000/”
+The private registry can also be added into swarmpit -  “Registry -> NEW REGISTRY“. Add the URL “https://manager-node-com:8300/”
 
 ## The HTTP Reverse Proxy – traefik.io
 
@@ -156,9 +174,6 @@ The HTTP reverse proxy is used to hide services from the internet. In addition t
 
 In Imixs-Docker-Cloud [traefik.io](traefik.io) is used as the service for a reverse proxy. 
 The service uses a separate overlay network to scann for services. A service which should be available through the proxy need to be run in the network 'imixs-proxy-net'. 
-
-	$ docker network create --driver=overlay imixs-proxy-net
-	
 
 Traefik is configured by a docker-compose.yml file and a traefik.toml file  located in the folder 'traefik/'
 
@@ -169,5 +184,5 @@ To start the service on the manager node:
     
 After traefik is stared you can access the web UI via port 8100
 
-http://192.168.99.100:8100
+	http://manager-nodec.om:8100
 
