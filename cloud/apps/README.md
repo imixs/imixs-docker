@@ -1,7 +1,7 @@
 # Applications
 
-The /apps/ directory holds the configuraiton of applications running as services in the docker-swarm environment.
-Each aplication has its own application direcotry holding a docker-compose.yml file to start the application.
+The /apps/ directory holds the configuration of applications running as services in the docker-swarm environment.
+Each application has its own application directory holding a docker-compose.yml file to start the application.
 
 
 	$ docker stack deploy -c apps/MY-APP/docker-compose.yml MY-APP
