@@ -75,6 +75,8 @@ After the swarmpit the front-end can be access on port 8200
 
 http://manager-node.com:8200
 
+<img src="imixs-cloud-02.png" />
+
 The default userid is ‘admin’ with the password ‘admin’.
 
 
@@ -185,4 +187,6 @@ To start the service on the manager node:
 After traefik is stared you can access the web UI via port 8100
 
 	http://manager-nodec.om:8100
+
+<img src="imixs-cloud-03.png" />
 

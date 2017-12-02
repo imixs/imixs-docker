@@ -30,11 +30,37 @@ The basic architecture of the Imixs-Docker-Cloud consists of the following compo
  * A management UI running on the management node.
  
  
+## Nodes
+
+A Imixs-Docker-Cloud consists of at least nodes. One node is the  management node, the other is the worker node serving our applications. The management node is visible via the internet. Worker nodes are only visible internally in the swarm. 
+
+
+<img src="imixs-cloud-01.png" />
+ 
+### Directories 
+ 
+The management node has the following directory strucuture
+
+	/-
+	 |- management/
+	 |   - registry/
+	 |   - swarmpit/
+	 |   - traefik/
+	 |- apps/
+
+Your can checkout the git repo or create the folders by your self. 
+Each directory typically holds a docker-compose.yml file to startup the corresponding service and optional additional configuration files.   
+ 
+ 
 # How to Setup
 
 [Docker-Swarm](https://docs.docker.com/engine/swarm/) is used to run a cluster of docker hosts serving business applications in docker-containers.
+Each node in the swarm has at least installed Docker.
 
-The the section [How to setup](setup/README.md) for further information.
+Read the following sections to setup a Imixs-Docker-Cloud
+
+ * [How to setup Imixs-Docker-Cloud](SETUP.md) - basic setup information.
+ * [How to secure Imixs-Docker-Cloud](SETUP.md) - advanced setup and security information.
 
 
 
