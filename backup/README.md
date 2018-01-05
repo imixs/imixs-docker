@@ -58,7 +58,7 @@ In this scenario the wildfly service access the PSQL server via the internal ove
 All backup files are stored in the folder _backups/_ and start with a time stamp in ISO format
 To restore a backup run the script _restore.sh_ with the timestamp
 
-	./restore.sh 2018-01-05_03:00exti
+	./restore.sh 2018-01-05_03:00
 
      
 # Contribute
