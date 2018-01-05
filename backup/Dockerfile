@@ -9,14 +9,14 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man/?? /usr/share/man/??_*
 
-# add the backup scripts
-ADD backup.sh /backup.sh
-RUN chmod +x /backup.sh
-ADD backup_init.sh /backup_init.sh
-RUN chmod +x /backup_init.sh
+# add the backup scripts into root/home
+ADD backup.sh /root/backup.sh
+RUN chmod +x /root/backup.sh
+ADD backup_init.sh /root/backup_init.sh
+RUN chmod +x /root/backup_init.sh
 
 # Add crontab file in the cron directory
-ADD backup-cron /etc/cron.d/backup-cron
-RUN chmod 0644 /etc/cron.d/backup-cron
+#ADD backup-cron /etc/cron.d/backup-cron
+#RUN chmod 0644 /etc/cron.d/backup-cron
 
-CMD ["/backup_init.sh"]
+CMD ["/root/backup_init.sh"]
