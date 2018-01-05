@@ -53,6 +53,13 @@ In this scenario the wildfly service access the PSQL server via the internal ove
 	      BACKUP_POSTGRES_HOST: "postgresoffice"
 	....
 
+# Restore
+
+All backup files are stored in the folder _backups/_ and start with a time stamp in ISO format
+To restore a backup run the script _restore.sh_ with the timestamp
+
+	./restore.sh 2018-01-05_03:00exti
+
      
 # Contribute
 The source is available on [Github](https://github.com/imixs/imixs-docker). Please [report any issues](https://github.com/imixs/imixs-docker/issues).

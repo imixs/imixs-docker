@@ -5,6 +5,8 @@ echo "Initalize backup service....."
 echo "cron = $BACKUP_CRON"
 echo "========================================================================="
 
+mkdir /root/backups
+
 # export all environment variables to be used by cron (starting with 'BACKUP_')
 env | sed 's/^\(.*\)$/export \1/g' | grep -E "^export BACKUP_" > /root/backup.properties
 
