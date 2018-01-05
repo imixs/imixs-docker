@@ -11,12 +11,12 @@ This Docker image provides a backup service for an Imixs-Workflow instance. The 
 
 ### Environment
 
-imixs/backup provides the following environment variables
+imixs/backup provides the following environment variables which need to be set during container startup:
 
-* POSTGRES_USER - postres database user
-* POSTGRES_PASSWORD - postgres user password
-* POSTGRES_DATABASE - postgres database
-* WILDFLY_INDEX - filepath for lucen index
+* BACKUP\_POSTGRES\_USER - postres database user
+* BACKUP\_POSTGRES\_PASSWORD - postgres user password
+* BACKUP\_POSTGRES\_DATABASE - postgres database
+* BACKUP\_WILDFLY\_INDEX - filepath for lucen index
 
 
 ## 1. Install Docker
@@ -24,11 +24,21 @@ Follow the [Docker installation instructions](https://docs.docker.com/engine/ins
 
 
 ## 2. Running and stopping a container
+
+The imixs/backup service is supposed to be run as part of a docker service stack. This means that the service is included in a docker-compose.yml file which already contains PQSL Database Server and a Wildfly Application Server. 
+In this szenario the wildfly service access the PSQL server via the internal overlay network. In the same way the backup service can access the database. The integration of the backup service into a docker-compose.yml file looks like this:
+
+
+
+
+
+
 The container can be started in background as an demon. You can start an instance with the command:
     
-    docker run --name="backup" -d \
+    docker run --name="backup" -it \
 	-e POSTGRES_USER="my-user" \
 	-e POSTGRES_PASSWORD="my password" \
+	-e POSTGRES_HOST="myhost" \
 	imixs/backup 
 
 
@@ -49,6 +59,15 @@ To test your backup configuration, first log into the bash of your backup contai
 	docker exec -it backup /bin/bash	
 	
   
+  
+# cron
+
+imixs/backup starts a cron job.
+
+See: https://ypereirareis.github.io/blog/2016/02/29/docker-crontab-environment-variables/
+  
+  
+  
 
      
 # Contribute
@@ -56,5 +75,5 @@ The source is available on [Github](https://github.com/imixs/imixs-docker). Plea
 
 To build the image from the Dockerfile run: 
 
-    docker build --tag=imixs/smabackuprthost .
+    docker build --tag=imixs/backup .
  
