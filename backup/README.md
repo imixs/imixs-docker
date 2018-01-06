@@ -19,7 +19,9 @@ imixs/backup provides the following environment variables which need to be set d
 * BACKUP\_POSTGRES\_USER - postres database user
 * BACKUP\_POSTGRES\_PASSWORD - postgres user password
 * BACKUP\_POSTGRES\_HOST - postgres database server
+* BACKUP\_POSTGRES\_ROLLING - number ob backup files to be kept locally
 * BACKUP\_WILDFLY\_INDEX - filepath for lucen index
+
 
 All backups are located in the follwoing directory 
 
@@ -42,6 +44,10 @@ Example:
 See details [here](https://wiki.ubuntuusers.de/Cron/).
 
 
+### Rolling Backup Files
+
+The backup script automatically holds a number of backup files locally. The default number of files to be keped is set to 5. You can cange this parameter with the environment variable "BACKUP\_POSTGRES\_ROLLING". 
+
 ## Running the service
 
 The imixs/backup service is supposed to be run as part of a docker service stack. This means that the service is included in a docker-compose.yml file which already contains PQSL Database Server and a Wildfly Application Server. 
@@ -51,10 +57,11 @@ In this scenario the wildfly service access the PSQL server via the internal ove
 	  backup:
 	    image: imixs/backup
 	    environment:
-	      BACKUP_CRON: "0 3 * * *"
+	      SETUP_CRON: "0 3 * * *"
 	      BACKUP_POSTGRES_USER: "postgres"
 	      BACKUP_POSTGRES_PASSWORD: "adminadmin"
 	      BACKUP_POSTGRES_HOST: "postgresoffice"
+	      BACKUP_POSTGRES_ROLLING: "5"
 	....
 
 # Restore
