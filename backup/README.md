@@ -21,6 +21,10 @@ imixs/backup provides the following environment variables which need to be set d
 * BACKUP\_POSTGRES\_HOST - postgres database server
 * BACKUP\_POSTGRES\_ROLLING - number ob backup files to be kept locally
 * BACKUP\_WILDFLY\_INDEX - filepath for lucen index
+* BACKUP\_FTP\_HOST - ftp host 
+* BACKUP\_FTP\_USER - ftp user 
+* BACKUP\_FTP\_PASSWORD - ftp password 
+
 
 
 All backups are located in the follwoing directory 

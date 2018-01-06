@@ -40,4 +40,20 @@ if [ "$BACKUPS_EXIST" -gt "$BACKUP_POSTGRES_ROLLING" ]
      ls -F /root/backups/*_pgdump.sql | head -n -$BACKUP_POSTGRES_ROLLING | xargs rm
 fi
 
+
+# FTP.....
+if [ "$BACKUP_FTP_HOST" != "" ]
+  then 
+     echo "*** Backup FTP upload...."
+     ncftpput -u $BACKUP_FTP_USER -p $BACKUP_FTP_PASSWORD $BACKUP_FTP_HOST /imixs-test/$(hostname)/$BACKUP_FILE
+	 if [ $? -ne 0 ]
+	   then 
+	      echo "*** Backup FTP Upload failed"
+	   else
+          echo "*** Backup FTP upload finished"
+     fi
+fi
+
+
+
 echo "*** Backup PSQL finished"
