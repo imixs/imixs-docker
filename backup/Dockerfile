@@ -17,7 +17,8 @@ RUN chmod +x /root/backup_init.sh
 ADD restore.sh /root/restore.sh
 RUN chmod +x /root/restore.sh
 
-
+RUN mkdir /root/backups
+VOLUME /root/backups
 
 # Add crontab file in the cron directory
 #ADD backup-cron /etc/cron.d/backup-cron

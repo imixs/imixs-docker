@@ -1,6 +1,7 @@
 # imixs/backup
 
-This Docker image provides a backup service for an Imixs-Workflow instance. The backup service can backup the PSQL database and also Imixs-Workflow search index (lucene). The backups are organized in a backup directory and can be automatically transfered to a FTP server. 
+This Docker image provides a backup service for an Imixs-Workflow instance. The backup service backups the PSQL database and also Imixs-Workflow search index (lucene). The backups are organized in a backup directory and can be automatically transfered to a FTP server. 
+The service is designed to backup only one database. In case you want to use this service to backup a complete PSQL server, than you should use the command "pg\_dumpall" instead of "pg\_dump". See the script backup.sh for details. 
 
 
 ## Features
@@ -14,12 +15,15 @@ The imixs/backup image is based on the office [postgres image](https://hub.docke
 
 imixs/backup provides the following environment variables which need to be set during container startup:
 
-* BACKUP\_CRON - the cron timer setting (e.g. "0 3 * * *")
+* SETUP\_CRON - the cron timer setting (e.g. "0 3 * * *")
 * BACKUP\_POSTGRES\_USER - postres database user
 * BACKUP\_POSTGRES\_PASSWORD - postgres user password
 * BACKUP\_POSTGRES\_HOST - postgres database server
 * BACKUP\_WILDFLY\_INDEX - filepath for lucen index
 
+All backups are located in the follwoing directory 
+
+	/root/backups/
 
 ### Backup Scripts
 All backup scripts are located in the root home directory (/root/). 
@@ -60,6 +64,7 @@ To restore a backup run the script _restore.sh_ with the timestamp
 
 	./restore.sh 2018-01-05_03:00
 
+**Note:** After a restore it is recommended to restart the wildfly container because wildfly uses JPA with a internal cache. To discard this cache a restore or a redeployment is needed. 
      
 # Contribute
 The source is available on [Github](https://github.com/imixs/imixs-docker). Please [report any issues](https://github.com/imixs/imixs-docker/issues).
