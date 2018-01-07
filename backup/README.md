@@ -16,6 +16,7 @@ The imixs/backup image is based on the office [postgres image](https://hub.docke
 imixs/backup provides the following environment variables which need to be set during container startup:
 
 * SETUP\_CRON - the cron timer setting (e.g. "0 3 * * *")
+* BACKUP\_SERVICE\_NAME - name of the backup service (defines the target folder on FTP space)
 * BACKUP\_POSTGRES\_USER - postres database user
 * BACKUP\_POSTGRES\_PASSWORD - postgres user password
 * BACKUP\_POSTGRES\_HOST - postgres database server
