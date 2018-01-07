@@ -30,12 +30,16 @@ imixs/backup provides the following environment variables which need to be set d
 All backups are located in the follwoing directory 
 
 	/root/backups/
+	
+### FTP
+In case a FTP Host is provided, the service will push backupfiles into a FTP server.
+The backup directory on the FTP server is
 
-### Backup Scripts
-All backup scripts are located in the root home directory (/root/). 
+    /imixs-cloud/$BACKUP_SERVICE_NAME/....
+    
+The $BACKUP\_SERVICE\_NAME can be provided as an environment variable. If not service name is set, the docker container ID is used instead.      	
 
- * backup_init.sh - initializes the backup service via cron
- * backup.sh - the backup script
+
 
 ### Cron
 Based on the cron settings provided in the environment variable "BACKUP\_CRON" the backup\_init script adds a cron job to run the backu.sh script.
@@ -47,6 +51,16 @@ Example:
 
 See details [here](https://wiki.ubuntuusers.de/Cron/).
 
+### Scripts
+All backup scripts are located in the root home directory (/root/). 
+
+ * backup_init.sh - initializes the backup service via cron
+ * backup.sh - the backup script
+ * restore.sh - the restore script
+
+The scripts can be called manually:
+
+    docker exec -it 2f4b2feaa412 /root/backup.sh
 
 ### Rolling Backup Files
 
