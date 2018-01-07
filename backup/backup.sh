@@ -16,6 +16,7 @@ source /root/backup.properties
 
 BACKUP_DATE="$(date +%Y-%m-%d_%H:%M)"
 BACKUP_FILE="backups/"$BACKUP_DATE"_pgdump.sql"
+CONTAINER_ID="$(cat /proc/self/cgroup | head -n 1 | cut -d '/' -f3)"
 
 # Backup PSQL database with the PSQL custom format
 # We only backup one specified database here. In case you want to create a complete backup of all databases use
@@ -45,7 +46,7 @@ fi
 if [ "$BACKUP_FTP_HOST" != "" ]
   then 
      echo "*** Backup FTP upload...."
-     ncftpput -u $BACKUP_FTP_USER -p $BACKUP_FTP_PASSWORD $BACKUP_FTP_HOST /imixs-test/$(hostname)/$BACKUP_FILE
+     ncftpput -u $BACKUP_FTP_USER -p $BACKUP_FTP_PASSWORD $BACKUP_FTP_HOST /imixs-cloud/$CONTAINER_ID/ $BACKUP_FILE
 	 if [ $? -ne 0 ]
 	   then 
 	      echo "*** Backup FTP Upload failed"
