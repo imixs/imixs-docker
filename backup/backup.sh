@@ -15,7 +15,7 @@ echo "*** Backup PSQL started...."
 source /root/backup.properties
 
 BACKUP_DATE="$(date +%Y-%m-%d_%H:%M)"
-BACKUP_FILE="backups/"$BACKUP_DATE"_pgdump.sql"
+BACKUP_FILE="/root/backups/"$BACKUP_DATE"_pgdump.sql"
 
 # Test if we have a service name, if not we default to the contaner id...
 if [ "$BACKUP_SERVICE_NAME" == "" ]

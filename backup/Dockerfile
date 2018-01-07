@@ -16,12 +16,10 @@ ADD backup_init.sh /root/backup_init.sh
 RUN chmod +x /root/backup_init.sh
 ADD restore.sh /root/restore.sh
 RUN chmod +x /root/restore.sh
+ADD ftpget.sh /root/ftpget.sh
+RUN chmod +x /root/ftpget.sh
 
 RUN mkdir /root/backups
 VOLUME /root/backups
-
-# Add crontab file in the cron directory
-#ADD backup-cron /etc/cron.d/backup-cron
-#RUN chmod 0644 /etc/cron.d/backup-cron
 
 CMD ["/root/backup_init.sh"]
