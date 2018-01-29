@@ -44,6 +44,7 @@ The container includes a start script which allows to start Wildfly with an admi
         -p 8080:8080 -p 9990:9990 \
         -e WILDFLY_PASS="admin_password" \
         imixs/wildfly
+        
 
 If you leave the environment parameter 'WILDFLY_PASS' empty, the start script will generate a random password. 
 If you expose the ports 8080 and 9990 you can access Wildfly via [http://<host-ip>:8080/](http://localhost:8080) and [http://<host-ip>:9990/](http://localhost:9990)
@@ -62,6 +63,9 @@ To follow the wildfly server log run:
 
     docker logs -f wildfly
 
+To log into the bash:
+
+	docker exec -it wildfly bash
 	
 ## How to bind external volumes
 
@@ -70,7 +74,7 @@ If you want to customize the configuration or deploy applications you can do so 
 * /opt/wildfly/standalone/configuration/  => for custom configuration files like standalone.xml
 * /opt/wildfly/standalone/deployments/ => to provide an external autodeploy directory. 
 
-This is an example to run imixs/wildfly with external volumes:
+This is an example to run imixs/wildfly with an external deployment volume:
 
      docker run --name="wildfly" -d \
 			-p 8080:8080 -p 9990:9990 \
@@ -87,11 +91,11 @@ Also an external configuration volume can be bound to the container:
 			-p 8080:8080 -p 9990:9990 \
 			-e WILDFLY_PASS="admin_password" \
 			-v ~/git/imixs-office-workflow/src/docker/imixs/config/deployments:/opt/wildfly/standalone/deployments/ \
-			-v ~/git/imixs-office-workflow/src/docker/imixs/config/configuration/:/opt/wildfly/standalone/configuration/ \
+			-v ~/git/imixs-office-workflow/src/docker/imixs/config/configuration/standalone.xml:/opt/wildfly/standalone/configuration/standalone.xml \
 			imixs/wildfly
 
 
-To start wildfly with a volumes shared from another application volume container (e.g. imixs/office) run:
+To start wildfly with a volumes shared from another application volume container run:
 
      docker run --name="wildfly" -d \
 			-p 8080:8080 -p 9990:9990 \
@@ -101,23 +105,39 @@ To start wildfly with a volumes shared from another application volume container
 
 ### Permissions
 
-The Imixs Wildfly container start the wildfly server with a system user having the uid and gid 901. 
+The Imixs Wildfly container start the wildfly server with a non-privileged system user having the uid and gid 901. 
 
 If you share a volume from your host to container, make sure that the user 901 has write permissions for the corresponding host directories:
 
-    chgrp -R 901 /path/to/deployments
-    chmod 775 -R /path/to/deployments
-
+    chgrp -R 901 /path/to/deployments && chmod 775 -R /path/to/deployments
 
 
 ## Linking containers
-For Java enterprise applications you often need an additional database server. you can link the wildfly container to such an external container. The following example creates a link to a postgreSQL container with the name 'postgres', which is the host name to be used in a database-pool configuration:
+For Java enterprise applications you often need an additional database server. You can link the wildfly container to a database container using the docker overlay network which is automatically provided by docker. Within this network you can access a database server via  the docker servcice name. See the following docker-compose.yml file
+d
 
-     docker run --name="wildfly" -d \
-			-p 8080:8080 -p 9990:9990 \
-			-e WILDFLY_PASS="admin_password" \
-			--link database-postgres:postgres \
-			imixs/wildfly
+	version: "3"
+	services:
+	
+	  postgres:
+	    image: postgres:9.6.1
+	    environment:
+	      POSTGRES_PASSWORD: xxx
+	      POSTGRES_DB: db
+	
+	  wildfly:
+	    image: imixs/wildfly
+	    environment:
+	      WILDFLY_PASS: adminadmin
+	      POSTGRES_USER: "postgres"
+	      POSTGRES_PASSWORD: "xxx"
+	      POSTGRES_CONNECTION: "jdbc:postgresql://postgres/db"
+	    ports:
+	      - "8080:8080"
+	      - "9990:9990"
+	      - "8787:8787"
+
+ 
 
 # Debug Mode
 
@@ -130,6 +150,20 @@ To run the container in debug mode the environment parameter 'DEBUG' can be set 
 			-e DEBUG=true \
 			imixs/wildfly
 
+# Heap Size
+
+The default memory setting for Wildfly are not very high and can be to less for productive applications. The default VM settings are typically:
+
+* -Xms64m
+* -Xmx512m
+
+For production mode this can be increased by providing the VM options in the environment variable "JAVA_OPTS".
+
+To increase the heap size from 512MB to 1GB add the following settings to your docker container:
+
+	...
+		-e JAVA_OPTS="-Xms64m -Xmx1g -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS -Djava.awt.headless=true"
+	....
 
 
 # Contribute
