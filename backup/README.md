@@ -6,7 +6,7 @@ The service is designed to backup only one database. In case you want to use thi
 
 
 ## Features
-* backup PSQL and files
+* backup PostgreSQL database
 * sftp/scp support to move backups to an external backup space
 * chron job
 * restore feature.
@@ -22,16 +22,19 @@ imixs/backup provides the following environment variables which need to be set d
 * BACKUP\_POSTGRES\_USER - postres database user
 * BACKUP\_POSTGRES\_PASSWORD - postgres user password
 * BACKUP\_POSTGRES\_DB - postgres database 
-* BACKUP\_POSTGRES\_ROLLING - number of backup files to be kept locally
-* BACKUP\_WILDFLY\_INDEX - filepath for lucen index
 * BACKUP\_SPACE\_HOST - backup space connected via SFTP/SCP 
 * BACKUP\_SPACE\_USER - backup space user 
+* BACKUP\_LOCAL\_ROLLING - number of backup files to be kept locally
 * BACKUP\_SPACE\_ROLLING - number of backup files to be kept in the backup space
 
 
-All backups are located in the following directory 
+All backups are located in the following local directory 
 
 	/root/backups/
+
+In the backup space, the files are located at:
+
+	/imixs-cloud/$BACKUP_SERVICE_NAME/
 	
 Each backup file has a time stamp prefix indicating the backup time:
 
@@ -55,6 +58,7 @@ All backup scripts are located in the root home directory (/root/).
  * backup_init.sh - initializes the backup service via cron
  * backup.sh - the backup script
  * restore.sh - the restore script
+ * backup_get.sh - to get a file form the remote backup space
 
 The scripts can be called manually:
 
@@ -62,7 +66,7 @@ The scripts can be called manually:
 
 ### Rolling Backup Files
 
-The backup script automatically holds a number of backup files locally. The default number of files to be kepetd is set to 5. You can change this parameter with the environment variable "BACKUP\_POSTGRES\_ROLLING".
+The backup script automatically holds a number of backup files locally. The default number of files to keep is set to 5. You can change this parameter with the environment variable "BACKUP\_LOCAL\_ROLLING".
 
 
 
@@ -122,7 +126,7 @@ In this scenario the wildfly service access the PSQL server via the internal ove
 	      BACKUP_POSTGRES_USER: "postgres"
 	      BACKUP_POSTGRES_PASSWORD: "xxxxxxxxxx"
 	      BACKUP_POSTGRES_HOST: "postgresoffice"
-	      BACKUP_POSTGRES_ROLLING: "5"
+	      BACKUP_LOCAL_ROLLING: "5"
 	....
 
 

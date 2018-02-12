@@ -4,7 +4,7 @@
 # * This backup script backups  a given PSQL database from a remote host.                 *
 # *                                                                                       *
 # * The script automatically removes old backup files. With the environment variable      *
-# * $BACKUP_POSTGRES_ROLLING set the number of files to be hold can be specified.         *
+# * $BACKUP_LOCAL_ROLLING set the number of files to be hold can be specified.         *
 # * The default value is 5                                                                *      
 # *                                                                                       *
 # * If a Backup Space is defined ($BACKUP_SPACE_HOST), the backup files will be moved     *
@@ -42,20 +42,20 @@ pg_dump -h $BACKUP_POSTGRES_HOST -U $BACKUP_POSTGRES_USER -d $BACKUP_POSTGRES_DB
 # ****************************************************
 # Remove deprecated backup files locally
 # ****************************************************
-# we remove the oldest backup files and keep only BACKUP_POSTGRES_ROLLING files
-if [ "$BACKUP_POSTGRES_ROLLING" == "" ]
+# we remove the oldest backup files and keep only BACKUP_LOCAL_ROLLING files
+if [ "$BACKUP_LOCAL_ROLLING" == "" ]
   then
-    echo "*** set BACKUP_POSTGRES_ROLLING = 5 (default)"
-    BACKUP_POSTGRES_ROLLING=5
+    echo "*** set BACKUP_LOCAL_ROLLING = 5 (default)"
+    BACKUP_LOCAL_ROLLING=5
 fi
 # first we count the existing backup files
 BACKUPS_EXIST_LOCAL=$(ls -l /root/backups/*_pgdump.sql | grep -v ^l | wc -l)
 # now we can remove the files if we have more than defined...
-if [ "$BACKUPS_EXIST_LOCAL" -gt "$BACKUP_POSTGRES_ROLLING" ] 
+if [ "$BACKUPS_EXIST_LOCAL" -gt "$BACKUP_LOCAL_ROLLING" ] 
   then 
      # remove the deprecated backup files...
-     echo "*** Backup PSQL rolling backup: keep only $BACKUP_POSTGRES_ROLLING files..."
-     ls -F /root/backups/*_pgdump.sql | head -n -$BACKUP_POSTGRES_ROLLING | xargs rm
+     echo "*** Backup rolling backup: keep only $BACKUP_LOCAL_ROLLING local files..."
+     ls -F /root/backups/*_pgdump.sql | head -n -$BACKUP_LOCAL_ROLLING | xargs rm
 fi
 
 
@@ -88,7 +88,7 @@ if [ "$BACKUP_SPACE_HOST" != "" ]
   if [ "$BACKUPS_EXIST_SPACE" -gt "$BACKUP_SPACE_ROLLING" ] 
     then 
        # remove the deprecated backup files...
-       echo "*** Backup Space rolling backup: keep only $BACKUP_POSTGRES_ROLLING files..."
+       echo "*** Backup Space rolling backup: keep only $BACKUP_SPACE_ROLLING files..."
        RESULT=`echo "ls -t /imixs-cloud/office-demo/*_pgdump.*" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep .sql`
        
        i=0
