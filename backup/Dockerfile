@@ -5,7 +5,7 @@ MAINTAINER Ralph Soika <ralph.soika@imixs.com>
 # install packages: psql and slim down image
 RUN apt-get update \
  && apt-get install --no-install-recommends -y \
-  cron ncftp \
+  cron ssh \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man/?? /usr/share/man/??_*
 
@@ -16,8 +16,8 @@ ADD backup_init.sh /root/backup_init.sh
 RUN chmod +x /root/backup_init.sh
 ADD restore.sh /root/restore.sh
 RUN chmod +x /root/restore.sh
-ADD ftpget.sh /root/ftpget.sh
-RUN chmod +x /root/ftpget.sh
+ADD backup_get.sh /root/backup_get.sh
+RUN chmod +x /root/backup_get.sh
 
 RUN mkdir /root/backups
 VOLUME /root/backups

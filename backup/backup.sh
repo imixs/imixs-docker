@@ -68,4 +68,11 @@ fi
 
 
 
+# Delete old files
+
+# Example:
+# echo rm /imixs-cloud/office-demo/2018-01-07_15:43_pgdump.sql | sftp u26457@u26457.your-backup.de
+
+
+
 echo "*** Backup PSQL finished"
