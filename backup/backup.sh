@@ -50,16 +50,19 @@ if [ "$BACKUPS_EXIST" -gt "$BACKUP_POSTGRES_ROLLING" ]
 fi
 
 
-# FTP.....
-if [ "$BACKUP_FTP_HOST" != "" ]
+# Transfer to Backup Space.....
+if [ "$BACKUP_SPACE_HOST" != "" ]
   then 
-     echo "*** Backup FTP upload...."
-     ncftpput -u "$BACKUP_FTP_USER" -p "$BACKUP_FTP_PASSWORD" -m $BACKUP_FTP_HOST /imixs-cloud/$BACKUP_SERVICE_NAME/ $BACKUP_FILE
+     echo "*** Backup Space upload...."
+     
+     # scp foobar.txt your_username@remotehost.edu:/some/remote/directory
+     scp $BACKUP_FILE $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST:/imixs-cloud/$BACKUP_SERVICE_NAME/
+     # ncftpput -u "$BACKUP_SPACE_USER" -p "$BACKUP_FTP_PASSWORD" -m $BACKUP_SPACE_HOST /imixs-cloud/$BACKUP_SERVICE_NAME/ $BACKUP_FILE
 	 if [ $? -ne 0 ]
 	   then 
-	      echo "*** Backup FTP Upload failed"
+	      echo "*** Upload into Backup Space failed"
 	   else
-          echo "*** Backup FTP upload finished"
+          echo "*** Upload into Backup Space finished"
      fi
 fi
 

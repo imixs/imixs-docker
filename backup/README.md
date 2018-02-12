@@ -23,9 +23,9 @@ imixs/backup provides the following environment variables which need to be set d
 * BACKUP\_POSTGRES\_DB - postgres database 
 * BACKUP\_POSTGRES\_ROLLING - number ob backup files to be kept locally
 * BACKUP\_WILDFLY\_INDEX - filepath for lucen index
-* BACKUP\_FTP\_HOST - ftp host 
-* BACKUP\_FTP\_USER - ftp user 
-* BACKUP\_FTP\_PASSWORD - ftp password 
+* BACKUP\_SPACE\_HOST - backup space connected via SFTP/SCP 
+* BACKUP\_SPACE\_USER - backup space user 
+* BACKUP\_SPACE\_PASSWORD - backup space password 
 
 
 All backups are located in the following directory 
@@ -36,13 +36,13 @@ Each backup file has a time stamp prefix indicating the backup time:
 
 	2018-01-07_03:00_pgdump.sql
  
-### FTP
-In case the optional environment variable "BACKUP\_FTP\_HOST" is provided, the service will push backupfiles automatically into a FTP server.
-The backup directory on the FTP server is
+### Backup Space
+In case the optional environment variable "BACKUP\_SPACE\_HOST" is provided, the service will push backup files automatically into a backup space via SFTP/SCP.
+The backup directory on the backup space is
 
     /imixs-cloud/$BACKUP_SERVICE_NAME/....
     
-The optional environment variable  "BACKUP\_SERVICE\_NAME" can be set to name the backup directory on the FTP space. If no service name is set, the docker container ID will be used instead.  
+The optional environment variable  "BACKUP\_SERVICE\_NAME" can be set to name the backup directory on the backup space. If no service name is set, the docker container ID will be used instead.  
 
 
 ### Cron
