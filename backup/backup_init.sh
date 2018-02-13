@@ -30,10 +30,8 @@ file_env() {
 
 # get Docker secrets....
 file_env 'BACKUP_POSTGRES_PASSWORD'
-echo "secret BACKUP_POSTGRES_PASSWORD = $BACKUP_POSTGRES_PASSWORD"
+# echo "secret BACKUP_POSTGRES_PASSWORD = $BACKUP_POSTGRES_PASSWORD"
 
-#file_env 'BACKUP_SERVICE_PASSWORD'
-#echo "secret BACKUP_SERVICE_PASSWORD = $BACKUP_SERVICE_PASSWORD"
 
 
 # export all environment variables starting with 'BACKUP_' to be used by cron 

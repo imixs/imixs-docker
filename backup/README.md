@@ -80,38 +80,18 @@ The optional environment variable  "BACKUP\_SERVICE\_NAME" can be set to name th
 
 #### Create a SSH Key
 
-To transfers files to the backup space via SFTP/SCP. For this reason a RFC4716 Public Key need to be provided on the backup space. 
+To transfers files to the backup space this service uses SFTP/SCP. For this reason a RFC4716 Public Key need to be provided on the backup space. 
 
-You can transfer your public key to RFC4716 format with the program "ssh-keygen" with the parameters "-e" and "-F < Input PubKey >". The important thing is that the automatically inserted comment line must be removed. You may have to manually create the. SSH directory on the backup space.
+You can generate a key pair within your backup container with the tool "ssh-keygen" and transfer your public key in RFC4716 format to your backup space (.ssh/id_rsa_rfc.pub). 
+The public key must be added into .ssh/authorized_key
 
+	backupspace# cat .ssh/id_rsa_rfc_backupservice.pub >> .ssh/authorized_keys
 
-	server# ssh-keygen
-	Generating public/private rsa key pair.
-	Enter file in which to save the key (/root/.ssh/id_rsa):
-	Enter passphrase (empty for no passphrase):
-	Enter same passphrase again:
-	Your identification has been saved in /root/.ssh/id_rsa.
-	Your public key has been saved in /root/.ssh/id_rsa.pub.
-	The key fingerprint is:
-	cb:3c:a0:39:69:39:ec:35:d5:66:f3:c5:92:99:2f:e1 root@server
-	The key's randomart image is:
-	+--[ RSA 2048]----+
-	|                 |
-	|                 |
-	|                 |
-	|         .   =   |
-	|      . S = * o  |
-	|   . = = + + =   |
-	|    X o =   E .  |
-	|   o + . .   .   |
-	|    .            |
-	+-----------------+
+With the helper script "share\_pub\_key.sh" you can automate this step.
 	
-	server# ssh-keygen -e -f .ssh/id_rsa.pub | grep -v "Comment:" > .ssh/id_rsa_rfc.pub
-	
-	server# cat .ssh/id_rsa_rfc.pub >> backup_authorized_keys
+	root@3b08f8641c03:/# /root/share_pub_key.sh
 
-
+The script will generate a new key pair and copies the public key into the backup space. You need to now the SFTP password to run the script. 
 
 ## Running the service
 
