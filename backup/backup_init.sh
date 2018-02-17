@@ -45,7 +45,13 @@ chmod 0600 ~/.pgpass
 # copy the ssh key for backup space if defined...
 if [ -f /run/secrets/backupspace_key ]
 then
+	mkdir /root/.ssh/
 	cp /run/secrets/backupspace_key /root/.ssh/id_rsa
+	chmod 600 /root/.ssh/id_rsa
+	echo "# Custom ssh settings" > /root/.ssh/config
+	echo "Host *" >> /root/.ssh/config
+	echo "    StrictHostKeyChecking no" >> /root/.ssh/config
+	chmod 400 /root/.ssh/config
 fi
 
 

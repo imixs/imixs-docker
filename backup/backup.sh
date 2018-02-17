@@ -29,6 +29,21 @@ if [ "$BACKUP_SERVICE_NAME" == "" ]
     echo "***        no service name set, default to container ID=$CONTAINER_ID"
     BACKUP_SERVICE_NAME=$CONTAINER_ID
 fi
+echo "***        BACKUP_SERVICE_NAME=$BACKUP_SERVICE_NAME"
+
+# Test rolling backup..
+if [ "$BACKUP_LOCAL_ROLLING" == "" ]
+  then
+    # set default
+    BACKUP_LOCAL_ROLLING=5
+fi
+echo "***        BACKUP_LOCAL_ROLLING=$BACKUP_LOCAL_ROLLING"
+if [ "$BACKUP_SPACE_ROLLING" == "" ]
+  then
+    BACKUP_SPACE_ROLLING=5
+fi
+echo "***        BACKUP_SPACE_ROLLING=$BACKUP_SPACE_ROLLING"
+  
 
 
 # ****************************************************
@@ -38,19 +53,17 @@ fi
 # pg_dumpall -c -h $BACKUP_POSTGRES_HOST -U $BACKUP_POSTGRES_USER > $BACKUP_FILE
 echo "***        database=$BACKUP_POSTGRES_DB"
 echo "***        filename=$BACKUP_FILE"
+echo "***        ...dump database"
 pg_dump -h $BACKUP_POSTGRES_HOST -U $BACKUP_POSTGRES_USER -d $BACKUP_POSTGRES_DB -Fc > $BACKUP_FILE
+
+BACKUP_FILESIZE=$(ls -l -h $BACKUP_FILE | cut -d " " -f5) 
+echo "***        filesize = $BACKUP_FILESIZE bytes."
 
 
 # ****************************************************
 # Remove deprecated backup files locally
 # ****************************************************
 # we remove the oldest backup files and keep only BACKUP_LOCAL_ROLLING files
-if [ "$BACKUP_LOCAL_ROLLING" == "" ]
-  then
-    # set default
-    BACKUP_LOCAL_ROLLING=5
-fi
-echo "***        rolling backup: BACKUP_LOCAL_ROLLING=$BACKUP_LOCAL_ROLLING"
 
 # first we count the existing backup files
 BACKUPS_EXIST_LOCAL=$(ls -l /root/backups/*_pgdump.sql | grep -v ^l | wc -l)
@@ -58,7 +71,7 @@ BACKUPS_EXIST_LOCAL=$(ls -l /root/backups/*_pgdump.sql | grep -v ^l | wc -l)
 if [ "$BACKUPS_EXIST_LOCAL" -gt "$BACKUP_LOCAL_ROLLING" ] 
   then 
      # remove the deprecated backup files...
-     echo "***        rolling backup: clean deprecated local backup files..."
+     echo "***        ...clean deprecated local backup files..."
      ls -F /root/backups/*_pgdump.sql | head -n -$BACKUP_LOCAL_ROLLING | xargs rm
 fi
 
@@ -68,23 +81,18 @@ fi
 # ****************************************************
 if [ "$BACKUP_SPACE_HOST" != "" ]
   then 
-     echo "***        upload to backup space..."
+     echo "***        ...upload to backup space..."
      scp $BACKUP_FILE $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST:/imixs-cloud/$BACKUP_SERVICE_NAME/
 	 if [ $? -ne 0 ]
 	   then 
-	      echo "***        upload into backup space failed!"
+	      echo "***        ...upload into backup space failed!"
      fi
   
   
   # ****************************************************
   # Remove deprecated backup files from backup space
   # ****************************************************
-  if [ "$BACKUP_SPACE_ROLLING" == "" ]
-    then
-      BACKUP_SPACE_ROLLING=5
-  fi
-  echo "***        rolling backup: BACKUP_SPACE_ROLLING=$BACKUP_SPACE_ROLLING"
-  
+
   # first we count the existing backup files in the backup space
   BACKUPS_EXIST_SPACE=$(echo ls -l /imixs-cloud/$BACKUP_SERVICE_NAME/*_pgdump.sql | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep -v ^l | wc -l)
   # now we remove the files if we have more than defined BACKUP_SPACE_ROLLING...
@@ -98,7 +106,7 @@ if [ "$BACKUP_SPACE_HOST" != "" ]
        while read -r line; do
           (( i++ ))
           if (( i > max )); then
-              echo "***        rolling backup: clean deprecated remote backup file $line..."
+              echo "***        ...clean deprecated remote backup file $line..."
               echo "rm $line" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST
           fi
        done <<< "$RESULT"
