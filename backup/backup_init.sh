@@ -30,17 +30,24 @@ file_env() {
 
 # get Docker secrets....
 file_env 'BACKUP_POSTGRES_PASSWORD'
-# echo "secret BACKUP_POSTGRES_PASSWORD = $BACKUP_POSTGRES_PASSWORD"
-
 
 
 # export all environment variables starting with 'BACKUP_' to be used by cron 
 env | sed 's/^\(.*\)$/export \1/g' | grep -E "^export BACKUP_" > /root/backup.properties
 chmod +x /root/backup.properties
 
+
 # create psql  password file...
 echo "$BACKUP_POSTGRES_HOST:*:*:$BACKUP_POSTGRES_USER:$BACKUP_POSTGRES_PASSWORD" >> ~/.pgpass 
 chmod 0600 ~/.pgpass
+
+
+# copy the ssh key for backup space if defined...
+if [ -f /run/secrets/backupspace_key ]
+then
+	cp /run/secrets/backupspace_key /root/.ssh/id_rsa
+fi
+
 
 # create backup-cron file...
 echo "$SETUP_CRON root /root/backup.sh > /proc/1/fd/1 2>/proc/1/fd/2" > /etc/cron.d/backup-cron

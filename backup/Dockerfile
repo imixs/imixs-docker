@@ -18,8 +18,6 @@ ADD restore.sh /root/restore.sh
 RUN chmod +x /root/restore.sh
 ADD backup_get.sh /root/backup_get.sh
 RUN chmod +x /root/backup_get.sh
-ADD share_pub_key.sh /root/share_pub_key.sh
-RUN chmod +x /root/share_pub_key.sh
 
 RUN mkdir /root/backups
 VOLUME /root/backups

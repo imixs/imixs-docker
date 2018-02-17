@@ -1,7 +1,7 @@
 # imixs/backup
 
-This Docker image provides a backup service to backup a PSQL database. The service can be combinded with an Imixs-Workflow instance to backup the database periodically. 
-All backup files are organized in a backup directory and will be automatically transfered to a backup space. 
+This Docker image provides a backup service to backup a PSQL database. The service can be added into a docker stack with an PSQL instance to backup the database periodically. 
+All backup files are organized in a backup directory and will be automatically transfered to a backup space if defined. 
 The service is designed to backup only one database. In case you want to use this service to backup a complete PSQL server, than you should use the command "pg\_dumpall" instead of "pg\_dump". See the script backup.sh for details. 
 
 
@@ -82,16 +82,35 @@ The optional environment variable  "BACKUP\_SERVICE\_NAME" can be set to name th
 
 To transfers files to the backup space this service uses SFTP/SCP. For this reason a RFC4716 Public Key need to be provided on the backup space. 
 
-You can generate a key pair within your backup container with the tool "ssh-keygen" and transfer your public key in RFC4716 format to your backup space (.ssh/id_rsa_rfc.pub). 
-The public key must be added into .ssh/authorized_key
+The backup service expects that a private key file is provided by a [docker secret](https://docs.docker.com/engine/swarm/secrets/). Docker secrets can be used only in docker swarm. So in this case you are forced to run the backup service in a docker swarm. 
 
-	backupspace# cat .ssh/id_rsa_rfc_backupservice.pub >> .ssh/authorized_keys
+To copy a ssh key provided in the file _/root/.ssh/backupspace_rsa_ into a docker secret run:
 
-With the helper script "share\_pub\_key.sh" you can automate this step.
+	docker secret create backupspace_key /root/.ssh/backupspace_rsa
+
+
+You can add the key as an environment variable to the stack definition:
+
+	version: '3.1'
 	
-	root@3b08f8641c03:/# /root/share_pub_key.sh
+	services:
+	....
+	   backup:
+	    image: imixs/backup:latest
+	    environment:
+	     .....
+	     BACKUP_SPACE_KEY_FILE: "/run/secrets/backupspace_key"
+       secrets:
+         ...
+         - backupspace_key
+	....
+	 secrets:
+	   backupspace_key:
+	     external: true
+	....
 
-The script will generate a new key pair and copies the public key into the backup space. You need to now the SFTP password to run the script. 
+	     
+
 
 ## Running the service
 
@@ -105,8 +124,19 @@ In this scenario the wildfly service access the PSQL server via the internal ove
 	      SETUP_CRON: "0 3 * * *"
 	      BACKUP_POSTGRES_USER: "postgres"
 	      BACKUP_POSTGRES_PASSWORD: "xxxxxxxxxx"
-	      BACKUP_POSTGRES_HOST: "postgresoffice"
+	      BACKUP_POSTGRES_HOST: "db"
+	      BACKUP_POSTGRES_DB: "my-database"
 	      BACKUP_LOCAL_ROLLING: "5"
+	....
+
+If you add a backup space the following optional environment settings are needed:
+
+
+	....
+	      BACKUP_SERVICE_NAME: "my-app"
+	      BACKUP_SPACE_HOST: "my-backup.org"
+	      BACKUP_SPACE_USER: "yyyy"
+	      BACKUP_SPACE_KEY_FILE: "/run/secrets/backupspace_key"
 	....
 
 
