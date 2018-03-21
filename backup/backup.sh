@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # *****************************************************************************************
-# * This backup script backups  a given PSQL database from a remote host.                 *
+# * This backup script backups a given MYSQL/PSQL database from a docker container.       *
+# * The script can also backup data from a docker volume shared by the container.         *
 # *                                                                                       *
 # * The script automatically removes old backup files. With the environment variable      *
 # * $BACKUP_LOCAL_ROLLING set the number of files to be hold can be specified.            *
@@ -20,9 +21,13 @@ echo "*** Backup started...."
 source /root/backup.properties
 
 BACKUP_DATE="$(date +%Y-%m-%d_%H:%M)"
-BACKUP_FILE="/root/backups/"$BACKUP_DATE"_pgdump.sql"
+BACKUP_FILE="/root/backups/"$BACKUP_DATE"_dump.tar.gz"
+DB_FILE="/root/backups/db.sql"
 
-# Test if we have a service name, if not we default to the contaner id...
+echo "***        Backup filename=$BACKUP_FILE"
+
+
+# Test if we have a service name, if not we default to the container id...
 if [ "$BACKUP_SERVICE_NAME" == "" ]
   then
     CONTAINER_ID="$(cat /proc/self/cgroup | head -n 1 | cut -d '/' -f3)"
@@ -43,21 +48,58 @@ if [ "$BACKUP_SPACE_ROLLING" == "" ]
     BACKUP_SPACE_ROLLING=5
 fi
 echo "***        BACKUP_SPACE_ROLLING=$BACKUP_SPACE_ROLLING"
-  
+
+# Backup volume...
+echo "***        BACKUP_VOLUME = $BACKUP_VOLUME"
+
+# Test database type (MYSQL/POSTGRESQL)  
+if [ "$BACKUP_DB_TYPE" == "MYSQL" ] || [ "$BACKUP_DB_TYPE" == "POSTGRESQL" ] ; then
+    echo "***        BACKUP_DB_TYPE = $BACKUP_DB_TYPE"
+    echo "***        BACKUP_DB = $BACKUP_DB"
+	echo "***        starting database dump..."
+
+	if [ "$BACKUP_DB_TYPE" == "POSTGRESQL" ] 
+	  then
+		# ****************************************************
+		# Backup PostgreSQL database with the PSQL custom format
+		# ****************************************************
+		# We only backup one specified database here. In case you want to create a complete backup of all databases use
+		# pg_dumpall -c -h $BACKUP_POSTGRES_HOST -U $BACKUP_POSTGRES_USER > $BACKUP_FILE
+		pg_dump -h $BACKUP_DB_HOST -U $BACKUP_DB_USER -d $BACKUP_DB -Fc > $DB_FILE
+	fi
+	
+	if [ "$BACKUP_DB_TYPE" == "MYSQL" ] 
+	  then
+		# ****************************************************
+		# Backup MySQL database with the PSQL custom format
+		# ****************************************************
+		mysqldump -h $BACKUP_DB_HOST -u $BACKUP_DB_USER -p $BACKUP_DB > $DB_FILE
+	fi
+	echo "***        ...database dump finished!"
+
+else
+    echo "***        WARNING: unsupported database type = $BACKUP_DB_TYPE"
+fi
+
 
 
 # ****************************************************
-# Backup PSQL database with the PSQL custom format
+# Create tar ball......
 # ****************************************************
-# We only backup one specified database here. In case you want to create a complete backup of all databases use
-# pg_dumpall -c -h $BACKUP_POSTGRES_HOST -U $BACKUP_POSTGRES_USER > $BACKUP_FILE
-echo "***        database=$BACKUP_POSTGRES_DB"
-echo "***        filename=$BACKUP_FILE"
-echo "***        ...dump database"
-pg_dump -h $BACKUP_POSTGRES_HOST -U $BACKUP_POSTGRES_USER -d $BACKUP_POSTGRES_DB -Fc > $BACKUP_FILE
-
+if [ "$BACKUP_VOLUME" == "" ] 
+  then
+	# backup sql dump only
+	tar -czvf $BACKUP_FILE $DB_FILE
+  else
+	# backup db with volume
+	tar -czvf $BACKUP_FILE $DB_FILE $BACKUP_VOLUME
+fi
+# remove .sql tmp file
+rm /root/backups/*_db.sql
 BACKUP_FILESIZE=$(ls -l -h $BACKUP_FILE | cut -d " " -f5) 
 echo "***        filesize = $BACKUP_FILESIZE bytes."
+
+
 
 
 # ****************************************************
@@ -66,13 +108,13 @@ echo "***        filesize = $BACKUP_FILESIZE bytes."
 # we remove the oldest backup files and keep only BACKUP_LOCAL_ROLLING files
 
 # first we count the existing backup files
-BACKUPS_EXIST_LOCAL=$(ls -l /root/backups/*_pgdump.sql | grep -v ^l | wc -l)
+BACKUPS_EXIST_LOCAL=$(ls -l /root/backups/*_dump.tar.gz | grep -v ^l | wc -l)
 # now we can remove the files if we have more than defined...
 if [ "$BACKUPS_EXIST_LOCAL" -gt "$BACKUP_LOCAL_ROLLING" ] 
   then 
      # remove the deprecated backup files...
      echo "***        ...clean deprecated local backup files..."
-     ls -F /root/backups/*_pgdump.sql | head -n -$BACKUP_LOCAL_ROLLING | xargs rm
+     ls -F /root/backups/*_dump.tar.gz | head -n -$BACKUP_LOCAL_ROLLING | xargs rm
 fi
 
 
@@ -94,12 +136,12 @@ if [ "$BACKUP_SPACE_HOST" != "" ]
   # ****************************************************
 
   # first we count the existing backup files in the backup space
-  BACKUPS_EXIST_SPACE=$(echo ls -l /imixs-cloud/$BACKUP_SERVICE_NAME/*_pgdump.sql | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep -v ^l | wc -l)
+  BACKUPS_EXIST_SPACE=$(echo ls -l /imixs-cloud/$BACKUP_SERVICE_NAME/*_dump.tar.gz | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep -v ^l | wc -l)
   # now we remove the files if we have more than defined BACKUP_SPACE_ROLLING...
   if [ "$BACKUPS_EXIST_SPACE" -gt "$BACKUP_SPACE_ROLLING" ] 
     then 
        # remove the deprecated backup files...
-       RESULT=`echo "ls -t /imixs-cloud/office-demo/*_pgdump.*" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep .sql`
+       RESULT=`echo "ls -t /imixs-cloud/office-demo/*_dump.*" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep .tar.gz`
        
        i=0
        max=$BACKUP_SPACE_ROLLING

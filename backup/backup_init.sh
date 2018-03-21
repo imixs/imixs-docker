@@ -29,7 +29,7 @@ file_env() {
 }
 
 # get Docker secrets....
-file_env 'BACKUP_POSTGRES_PASSWORD'
+file_env 'BACKUP_DB_PASSWORD'
 
 
 # export all environment variables starting with 'BACKUP_' to be used by cron 
@@ -38,7 +38,7 @@ chmod +x /root/backup.properties
 
 
 # create psql  password file...
-echo "$BACKUP_POSTGRES_HOST:*:*:$BACKUP_POSTGRES_USER:$BACKUP_POSTGRES_PASSWORD" >> ~/.pgpass 
+echo "$BACKUP_DB_HOST:*:*:$BACKUP_DB_USER:$BACKUP_DB_PASSWORD" >> ~/.pgpass 
 chmod 0600 ~/.pgpass
 
 

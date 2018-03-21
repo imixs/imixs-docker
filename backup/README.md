@@ -1,27 +1,33 @@
 # imixs/backup
 
-This Docker image provides a backup service to backup a PSQL database. The service can be added into a docker stack with an PSQL instance to backup the database periodically. 
-All backup files are organized in a backup directory and will be automatically transfered to a backup space if defined. 
-The service is designed to backup only one database. In case you want to use this service to backup a complete PSQL server, than you should use the command "pg\_dumpall" instead of "pg\_dump". See the script backup.sh for details. 
+This Docker image provides a backup service to backup a PostgreSQL or MySQL database of a docker volume. 
+The service can be added into a docker stack with an PSQL or MySQL instance to backup the database periodically. 
+The service also backups optional files from a mounted docker volume. 
+
+All backup files are organized in a backup directory and can optional be transfered into a backup space. 
+The service is designed to backup only one database. In case you want to use this service to backup a complete PSQL or MySQL server, than you should use the command "pg\_dumpall" instead of "pg\_dump". See the script backup.sh for details. 
 
 
 ## Features
-* backup PostgreSQL database
+* backup PostgreSQL or MySQL database
+* backup file content from a docker volume
 * sftp/scp support to move backups to an external backup space
 * chron job
 * restore feature.
 
 ## Environment
-The imixs/backup image is based on the [official postgres image](https://hub.docker.com/_/postgres/).
+The imixs/backup image is based on the [official postgres image](https://hub.docker.com/_/postgres/) with additional mysql-client support.
 
 imixs/backup provides the following environment variables which need to be set during container startup:
 
 * SETUP\_CRON - the cron timer setting (e.g. "0 3 * * *")
 * BACKUP\_SERVICE\_NAME - name of the backup service (defines the target folder on FTP space)
-* BACKUP\_POSTGRES\_HOST - postgres server
-* BACKUP\_POSTGRES\_USER - postres database user
-* BACKUP\_POSTGRES\_PASSWORD - postgres user password
-* BACKUP\_POSTGRES\_DB - postgres database 
+* BACKUP\_DB\_HOST - datbase server
+* BACKUP\_DB\_USER - database user
+* BACKUP\_DB\_PASSWORD - database user password
+* BACKUP\_DB\_TYPE - set to 'MYSQL' or 'POSTGRESQL' 
+* BACKUP\_DB - the postgres or mysql database name 
+* BACKUP\_VOLUME - optional file directory from a mapped docker volume  
 * BACKUP\_SPACE\_HOST - backup space connected via SFTP/SCP 
 * BACKUP\_SPACE\_USER - backup space user 
 * BACKUP\_LOCAL\_ROLLING - number of backup files to be kept locally
@@ -38,12 +44,12 @@ In the backup space, the files are located at:
 	
 Each backup file has a time stamp prefix indicating the backup time:
 
-	2018-01-07_03:00_pgdump.sql
+	2018-01-07_03:00_dump.tar.gz
  
 
 
 ### Cron
-Based on the cron settings provided in the environment variable "BACKUP\_CRON" the backup\_init script starts a cron job to schedule the backup.sh script.
+Based on the _cron_ settings provided in the environment variable "BACKUP\_CRON" the backup\_init script starts a cron job to schedule the backup.sh script.
 
 Example:
 
@@ -122,10 +128,11 @@ In this scenario the wildfly service access the PSQL server via the internal ove
 	    image: imixs/backup
 	    environment:
 	      SETUP_CRON: "0 3 * * *"
-	      BACKUP_POSTGRES_USER: "postgres"
-	      BACKUP_POSTGRES_PASSWORD: "xxxxxxxxxx"
-	      BACKUP_POSTGRES_HOST: "db"
-	      BACKUP_POSTGRES_DB: "my-database"
+	      BACKUP_DB_USER: "postgres"
+	      BACKUP_DB_PASSWORD: "xxxxxxxxxx"
+	      BACKUP_DB_HOST: "db"
+	      BACKUP_DB_TYPE: "POSTGRESQL"
+	      BACKUP_DB: "my-database"
 	      BACKUP_LOCAL_ROLLING: "5"
 	....
 
@@ -139,7 +146,16 @@ If you add a backup space the following optional environment settings are needed
 	      BACKUP_SPACE_KEY_FILE: "/run/secrets/backupspace_key"
 	....
 
+If you want to backup file directories form a mounted volume:
 
+
+	....
+	      BACKUP_VOLUME: "/home/imixs" 
+	    volumes: 
+         - appdata:/home/imixs
+    ....
+    
+    
 ## Manual Backup
 
 To start a backup manually from inside the container run:
