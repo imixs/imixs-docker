@@ -95,7 +95,7 @@ if [ "$BACKUP_VOLUME" == "" ]
 	tar -czvf $BACKUP_FILE $DB_FILE $BACKUP_VOLUME
 fi
 # remove .sql tmp file
-rm /root/backups/*_db.sql
+rm /root/backups/db.sql
 BACKUP_FILESIZE=$(ls -l -h $BACKUP_FILE | cut -d " " -f5) 
 echo "***        filesize = $BACKUP_FILESIZE bytes."
 
@@ -141,7 +141,7 @@ if [ "$BACKUP_SPACE_HOST" != "" ]
   if [ "$BACKUPS_EXIST_SPACE" -gt "$BACKUP_SPACE_ROLLING" ] 
     then 
        # remove the deprecated backup files...
-       RESULT=`echo "ls -t /imixs-cloud/office-demo/*_dump.*" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep .tar.gz`
+       RESULT=`echo "ls -t /imixs-cloud/$BACKUP_SERVICE_NAME/*_dump.tar.gz" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep .tar.gz`
        
        i=0
        max=$BACKUP_SPACE_ROLLING
