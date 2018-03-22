@@ -113,7 +113,7 @@ BACKUPS_EXIST_LOCAL=$(ls -l /root/backups/*_dump.tar.gz | grep -v ^l | wc -l)
 if [ "$BACKUPS_EXIST_LOCAL" -gt "$BACKUP_LOCAL_ROLLING" ] 
   then 
      # remove the deprecated backup files...
-     echo "***        ...clean deprecated local backup files..."
+     echo "***        ...clean deprecated local dumps..."
      ls -F /root/backups/*_dump.tar.gz | head -n -$BACKUP_LOCAL_ROLLING | xargs rm
 fi
 
@@ -140,15 +140,16 @@ if [ "$BACKUP_SPACE_HOST" != "" ]
   # now we remove the files if we have more than defined BACKUP_SPACE_ROLLING...
   if [ "$BACKUPS_EXIST_SPACE" -gt "$BACKUP_SPACE_ROLLING" ] 
     then 
-       # remove the deprecated backup files...
-       RESULT=`echo "ls -t /imixs-cloud/$BACKUP_SERVICE_NAME/*_dump.tar.gz" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep .tar.gz`
+       # get a list of all dump files (tricky command because ls -t does not work)...
+       RESULT=`echo "ls /imixs-cloud/$BACKUP_SERVICE_NAME/*_dump.*" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep .tar.gz | sort -Vr`
        
+       # remove the deprecated backup files...
        i=0
        max=$BACKUP_SPACE_ROLLING
-       while read -r line; do
+       while read line; do
           (( i++ ))
           if (( i > max )); then
-              echo "***        ...clean deprecated remote backup file $line..."
+              echo "***        ...clean deprecated remote dump $line..."
               echo "rm $line" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST
           fi
        done <<< "$RESULT"
