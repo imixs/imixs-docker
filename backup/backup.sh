@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # *****************************************************************************************
-# * This backup script backups a given MYSQL/PSQL database from a docker container.       *
+# * The backup script backups a given MYSQL/PSQL database from a docker container.       *
 # * The script can also backup data from a docker volume shared by the container.         *
 # *                                                                                       *
 # * The script automatically removes old backup files. With the environment variable      *
@@ -15,7 +15,9 @@
 # * Find details here: https://github.com/imixs/imixs-docker/tree/master/backup           *
 # *****************************************************************************************
 
-echo "*** Backup started...."
+echo "========================================================================="
+echo "Starting Backup...."
+echo "========================================================================="
 
 # make environment variables visible to cron 
 source /root/backup.properties
