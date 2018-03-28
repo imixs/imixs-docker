@@ -118,23 +118,34 @@ You can add the key as an environment variable to the stack definition:
 	     
 
 
-## Running the service
+## How to Deploy the Service
 
-The imixs/backup service is supposed to be run as part of a docker service stack. This means that the service is included in a docker-compose.yml file which already contains PQSL Database Server and a Wildfly Application Server. 
-In this scenario the wildfly service access the PSQL server via the internal overlay network. In the same way the backup service can access the database. The integration of the backup service into a docker-compose.yml file looks like this:
+The imixs/backup service is supposed to be run as part of a docker service stack. This means that the service is included in a docker-compose.yml file which already contains PQSL or MYSQL Database Server and optional a mounted volume. The database service is typically bound using an internal network.
+ 
+The following example shows a service definition of the backup service to backup a Wordpress Service with a MySQL database and a volume named 'wp-content' containing the wordpress content. 
+
+
 
 	...
 	  backup:
-	    image: imixs/backup
+	    image: imixs/backup:1.2.1
 	    environment:
-	      SETUP_CRON: "0 3 * * *"
-	      BACKUP_DB_USER: "postgres"
-	      BACKUP_DB_PASSWORD: "xxxxxxxxxx"
+	      SETUP_CRON: "0 4 * * *"
+	      BACKUP_SERVICE_NAME: "my-service"
+	      BACKUP_DB_USER: "wordpress_dms"
+	      BACKUP_DB_PASSWORD: "xxxxxxxxxxx"
 	      BACKUP_DB_HOST: "db"
-	      BACKUP_DB_TYPE: "POSTGRESQL"
-	      BACKUP_DB: "my-database"
+	      BACKUP_DB_TYPE: "MYSQL"
+	      BACKUP_DB: "wordpress"
+	      BACKUP_VOLUME: "/var/www/html/wp-content"
 	      BACKUP_LOCAL_ROLLING: "5"
-	....
+	    volumes: 
+	      - wp-content:/var/www/html/wp-content
+	    networks:
+	      - backend
+	    volumes: 
+	      - wp-content:/var/www/html/wp-content
+      	....
 
 If you add a backup space the following optional environment settings are needed:
 
@@ -180,7 +191,7 @@ You can verify the current available backups from outside with the command:
 
 To restore a backup run the script _restore.sh_ followed by the timestamp
 
-	./restore.sh 2018-01-05_03:00
+	$ ./restore.sh 2018-01-05_03:00
 	
 
 **Note:** After a restore it is recommended to restart the wildfly container because wildfly uses JPA with a internal cache. To discard this cache a restore or a redeployment is needed. 
@@ -188,11 +199,16 @@ To restore a backup run the script _restore.sh_ followed by the timestamp
 
 Also you can trigger a restore from outside with the command:
 
-	docker exec -it 82526abbabfe ls -la /root/restore.sh 2018-01-05_03:00
+	$ docker exec -it 82526abbabfe ls -la /root/restore.sh 2018-01-05_03:00
 	
 ## Get a Backup File form the Backup Space
 
-In case you need to pull a backup file from the backup space run the script backup_get.sh :
+In case you need to pull a backup file from the backup space you can run the following command to get a list of available backups:
+
+	$ echo ls -la /imixs-cloud/$BACKUP_SERVICE_NAME | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST
+
+
+ run the script backup_get.sh :
 
 	backup_get.sh /imixs-cloud/SERVICE-ID/BACKUPFILE BACKUPFILE
 

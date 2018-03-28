@@ -126,12 +126,13 @@ fi
 if [ "$BACKUP_SPACE_HOST" != "" ]
   then 
      echo "***        ...upload to backup space..."
-     scp $BACKUP_FILE $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST:/imixs-cloud/$BACKUP_SERVICE_NAME/
-	 if [ $? -ne 0 ]
-	   then 
-	      echo "***        ...upload into backup space failed!"
-     fi
-  
+     
+     sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST > /dev/null << SFTPEOF 
+       cd /imixs-cloud/$BACKUP_SERVICE_NAME/
+       put $BACKUP_FILE 
+       quit
+SFTPEOF
+     
   
   # ****************************************************
   # Remove deprecated backup files from backup space

@@ -37,9 +37,15 @@ env | sed 's/^\(.*\)$/export \1/g' | grep -E "^export BACKUP_" > /root/backup.pr
 chmod +x /root/backup.properties
 
 
-# create psql  password file...
+# create psql password file so pgdump runs without password prompt...
 echo "$BACKUP_DB_HOST:*:*:$BACKUP_DB_USER:$BACKUP_DB_PASSWORD" >> ~/.pgpass 
 chmod 0600 ~/.pgpass
+
+# create MySQL password file so mysqldump runs without password prompt...
+echo "[mysqldump]" >> ~/.my.cnf
+echo "user=$BACKUP_DB_USER" >> ~/.my.cnf
+echo "password=$BACKUP_DB_PASSWORD" >> ~/.my.cnf
+chmod 0600 ~/.my.cnf
 
 
 # copy the ssh key for backup space if defined...
@@ -52,6 +58,16 @@ then
 	echo "Host *" >> /root/.ssh/config
 	echo "    StrictHostKeyChecking no" >> /root/.ssh/config
 	chmod 400 /root/.ssh/config
+	
+	# create the target dir....
+sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST << SFTPEOF 
+          mkdir /imixs-cloud
+          mkdir /imixs-cloud/$BACKUP_SERVICE_NAME/
+          quit
+SFTPEOF
+
+	
+	
 fi
 
 
