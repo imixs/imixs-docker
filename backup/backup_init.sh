@@ -65,8 +65,6 @@ sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST << SFTPEOF
           mkdir /imixs-cloud/$BACKUP_SERVICE_NAME/
           quit
 SFTPEOF
-
-	
 	
 fi
 
@@ -74,6 +72,9 @@ fi
 # create backup-cron file...
 echo "$SETUP_CRON root /root/backup.sh > /proc/1/fd/1 2>/proc/1/fd/2" > /etc/cron.d/backup-cron
 chmod 0644 /etc/cron.d/backup-cron
+
+echo "Initalize backup service completed."
+echo "Starting cron...."
 
 # Run cron.....
 cron -f
