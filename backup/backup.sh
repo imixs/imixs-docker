@@ -63,7 +63,8 @@ if [ "$BACKUP_DB_TYPE" == "MYSQL" ] || [ "$BACKUP_DB_TYPE" == "POSTGRESQL" ] ; t
 	if [ "$BACKUP_DB_TYPE" == "POSTGRESQL" ] 
 	  then
 		# ****************************************************
-		# Backup PostgreSQL database with the PSQL custom format
+		# Backup PostgreSQL database with the PSQL custom format 
+		# - password is provided by backup_init script
 		# ****************************************************
 		# We only backup one specified database here. In case you want to create a complete backup of all databases use
 		# pg_dumpall -c -h $BACKUP_POSTGRES_HOST -U $BACKUP_POSTGRES_USER > $BACKUP_FILE
@@ -74,8 +75,9 @@ if [ "$BACKUP_DB_TYPE" == "MYSQL" ] || [ "$BACKUP_DB_TYPE" == "POSTGRESQL" ] ; t
 	  then
 		# ****************************************************
 		# Backup MySQL database with the PSQL custom format
+		# - password is provided by backup_init script
 		# ****************************************************
-		mysqldump -h $BACKUP_DB_HOST -u $BACKUP_DB_USER -p $BACKUP_DB > $DB_FILE
+		mysqldump -h $BACKUP_DB_HOST -u $BACKUP_DB_USER $BACKUP_DB > $DB_FILE
 	fi
 	echo "***        ...database dump finished!"
 
