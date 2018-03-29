@@ -79,7 +79,7 @@ if [ "$BACKUP_DB_TYPE" == "MYSQL" ] || [ "$BACKUP_DB_TYPE" == "POSTGRESQL" ] ; t
 		# ****************************************************
 		mysqldump -h $BACKUP_DB_HOST -u $BACKUP_DB_USER $BACKUP_DB > $DB_FILE
 	fi
-	echo "***        ...database dump finished!"
+	echo "***        ...database dump finished! "
 
 else
     echo "***        WARNING: unsupported database type = $BACKUP_DB_TYPE"
