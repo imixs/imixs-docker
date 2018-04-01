@@ -93,10 +93,10 @@ fi
 if [ "$BACKUP_VOLUME" == "" ] 
   then
 	# backup sql dump only
-	tar -czvf $BACKUP_FILE $DB_FILE
+	tar -czf $BACKUP_FILE $DB_FILE
   else
 	# backup db with volume
-	tar -czvf $BACKUP_FILE $DB_FILE $BACKUP_VOLUME
+	tar -czf $BACKUP_FILE $DB_FILE $BACKUP_VOLUME
 fi
 # remove .sql tmp file
 rm /root/backups/db.sql
