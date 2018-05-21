@@ -191,7 +191,7 @@ You can verify the current available backups from outside with the command:
 
 To restore a backup run the script _restore.sh_ followed by the timestamp
 
-	$ ./restore.sh 2018-01-05_03:00
+	$ /root/restore.sh 2018-01-05_03:00
 	
 
 **Note:** After a restore it is recommended to restart the wildfly container because wildfly uses JPA with a internal cache. To discard this cache a restore or a redeployment is needed. 
@@ -203,14 +203,18 @@ Also you can trigger a restore from outside with the command:
 	
 ## Get a Backup File form the Backup Space
 
-In case you need to pull a backup file from the backup space you can run the following command to get a list of available backups:
+In case you need to pull a backup file from the backup space you need first to login to the backup container:
+
+	$ docker exec -it 82526abbabfe bash
+	
+now you can run the following command to get a list of available backups:
 
 	$ echo ls -la /imixs-cloud/$BACKUP_SERVICE_NAME | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST
 
 
  run the script backup_get.sh :
 
-	backup_get.sh /imixs-cloud/SERVICE-ID/BACKUPFILE BACKUPFILE
+	/root/backup_get.sh /imixs-cloud/$BACKUP_SERVICE_NAME/[BACKUPFILE]
 
 You need to specify the source file located in your backup space. With SFTP you can print the directory content from the FTP Space:
 
