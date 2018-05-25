@@ -68,7 +68,7 @@ All backup scripts are located in the root home directory (/root/).
 
 The scripts can be called manually:
 
-    docker exec -it 2f4b2feaa412 /root/backup.sh
+	$ docker exec -it 2f4b2feaa412 /root/backup.sh
 
 ### Rolling Backup Files
 
@@ -169,61 +169,75 @@ If you want to backup file directories form a mounted volume:
     
 ## Manual Backup
 
-To start a backup manually from inside the container run:
+A backup can be started manually by the backup script. The backup script can be run either from outside the container: 
 
-	./backup.sh
-
-You can start a manual backup from outside with the following command
-
-	docker exec -it 82526abbabfe /root/backup.sh
+	$ docker exec -it 82526abbabfe /root/backup.sh
 
 (You need to replace the container ID with the id of your backup service.)
+
+or you can first log into the backup container with: 
+
+	$ docker exec -it 82526abbabfe bash
+
+(You need to replace the container ID with the id of your backup service.)
+
+and than start the backup script directly:  
+
+	root@82526abbabfe:/# /root/backup.sh
+
+To list all locally available backups run:
+
+	ls -la /root/backups
+
 
 # Restore
 
-All backup files are stored in the folder _/root/backups/_ and start with a time stamp in ISO format
+The Backup Service provides scripts to restore and load backup files. All scripts can be started either from outside the container: 
 
-You can verify the current available backups from outside with the command:
-
-	docker exec -it 82526abbabfe ls -la /root/backups
+	docker exec -it 82526abbabfe [SCRIPT]
 
 (You need to replace the container ID with the id of your backup service.)
 
-To restore a backup run the script _restore.sh_ followed by the timestamp
+or you can first log into the backup container with: 
 
-	$ /root/restore.sh 2018-01-05_03:00
+	docker exec -it 82526abbabfe bash
+
+(You need to replace the container ID with the id of your backup service.)
+
+and than start the scripts directly.
+
+## Restore Local Backup Files:
+
+All backup files are stored in the folder _/root/backups/_. The files include a time stamp in ISO format indicating the backup time. 
+
+To list all locally available backups run:
+
+	ls -la /root/backups
+
+To restore the latest backup run:
+
+	/root/restore.sh
+
+To restore a specific backup run the script _restore.sh_ followed by the timestamp of the backupfile: 
+
+	/root/restore.sh 2018-01-05_03:00
+
+
 	
+## Restore Remote Backup Files:
 
-**Note:** After a restore it is recommended to restart the wildfly container because wildfly uses JPA with a internal cache. To discard this cache a restore or a redeployment is needed. 
+In case you have no local backup files available, you can pull a backup file first from the backup space.
 
+Run the following command to get a list of all backup files available on the backupspace:
 
-Also you can trigger a restore from outside with the command:
+	echo ls -la /imixs-cloud/$BACKUP_SERVICE_NAME | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST
 
-	$ docker exec -it 82526abbabfe ls -la /root/restore.sh 2018-01-05_03:00
-	
-## Get a Backup File form the Backup Space
-
-In case you need to pull a backup file from the backup space you need first to login to the backup container:
-
-	$ docker exec -it 82526abbabfe bash
-	
-now you can run the following command to get a list of available backups:
-
-	$ echo ls -la /imixs-cloud/$BACKUP_SERVICE_NAME | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST
-
-
- run the script backup_get.sh :
+You can pull a specific backup file with the script backup_get.sh followed by the filename:
 
 	/root/backup_get.sh /imixs-cloud/$BACKUP_SERVICE_NAME/[BACKUPFILE]
 
-You need to specify the source file located in your backup space. With SFTP you can print the directory content from the FTP Space:
 
-	docker exec -it 82526abbabfe echo ls / | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST
-
-
-
-After the script is completed, the file is written into the directory /root/backups/. 
-You can run a restore on this file.
+The remote backupfile will be written to the directory /root/backups/.  Now you can restore the backup as explained before. 
 
      
      

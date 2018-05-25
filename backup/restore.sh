@@ -21,20 +21,23 @@ BACKUP_FILE=""
 
 if [ $# -eq 0 ]
   then
-    echo "*** No arguments supplied, restore last backup..."
+    echo "*** no arguments supplied, restore last backup..."
     # determine last backup file
     BACKUP_FILE=$(ls -F /root/backups/*_dump.tar.gz | tail -n 1)
   else
-    echo "*** Restore dump.tar.gz from $1"
+    echo "*** restore timestamp: $1"
     BACKUP_FILE="/root/backups/$1_dump.tar.gz"
 fi    
     
+# First extract the backup file...
+echo "*** extracting backupfile" $BACKUP_FILE "...."
+tar -xzf $BACKUP_FILE -C /
   
 # Test database type (MYSQL/POSTGRESQL)  
 if [ "$BACKUP_DB_TYPE" == "MYSQL" ] || [ "$BACKUP_DB_TYPE" == "POSTGRESQL" ] ; then
+    echo "*** starting database restore..."
     echo "***        BACKUP_DB_TYPE = $BACKUP_DB_TYPE"
     echo "***        BACKUP_DB = $BACKUP_DB"
-        echo "***        starting database restore..."
 
         if [ "$BACKUP_DB_TYPE" == "POSTGRESQL" ] 
           then
@@ -62,11 +65,6 @@ else
     echo "***        WARNING: unsupported database type = $BACKUP_DB_TYPE"
 fi
 
-
-echo "!!! file storage restore not yet implmented !!! "
 echo "*** Restore  finished"
 
-echo "extracting tar file" $BACKUP_FILE "...."
-tar -xzf $BACKUP_FILE    
-    
 
