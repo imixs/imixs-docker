@@ -47,9 +47,10 @@ if [ "$BACKUP_DB_TYPE" == "MYSQL" ] || [ "$BACKUP_DB_TYPE" == "POSTGRESQL" ] ; t
                 # ****************************************************
                 # We only backup one specified database here. In case you want to create a complete backup of all databases use
                 # pg_dumpall -c -h $BACKUP_POSTGRES_HOST -U $BACKUP_POSTGRES_USER > $BACKUP_FILE
-                #pg_dump -h $BACKUP_DB_HOST -U $BACKUP_DB_USER -d $BACKUP_DB -Fc > $DB_FILE
-                echo "qsql restore not yet tested!!!!"
-                pg_restore -c -h $BACKUP_DB_HOST -U $BACKUP_DB_USER -Fc -d $BACKUP_DB_DB  /root/backups/db.sql
+                #
+                # Script:
+                # pg_dump -h $BACKUP_DB_HOST -U $BACKUP_DB_USER -d $BACKUP_DB -Fc > $DB_FILE               
+                pg_restore -c -h $BACKUP_DB_HOST -U $BACKUP_DB_USER -Fc -d $BACKUP_DB  /root/backups/db.sql
         fi
         
         if [ "$BACKUP_DB_TYPE" == "MYSQL" ] 
