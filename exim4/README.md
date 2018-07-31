@@ -76,4 +76,12 @@ The source is available on [Github](https://github.com/imixs/imixs-docker). Plea
 To build the image from the Dockerfile run: 
 
     docker build --tag=imixs/smarthost .
- 
+
+## Push manually to Docker repo (Docker-Hub)
+
+To push the image to a docker repo: 
+
+
+	docker build -t imixs/smarthost:X.X.X .
+	
+	docker push imixs/smarthost:X.X.X 
