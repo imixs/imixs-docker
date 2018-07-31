@@ -37,7 +37,7 @@ The following image versions are available:
  * imixs/wildfly:1.2.3  =>  Wildfly 11.0.0.Final
  * imixs/wildfly:1.2.4  =>  Wildfly 12.0.0.Final
  * imixs/wildfly:1.2.5  =>  Wildfly 13.0.0.Final
- 
+
 
 ## 1. Install Docker
 Follow the [Docker installation instructions](https://docs.docker.com/engine/installation/) for your host system.
