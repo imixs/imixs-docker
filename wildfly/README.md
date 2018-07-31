@@ -184,4 +184,12 @@ You can also log into the running wildfly with a bash:
 
 	docker exec -it wildfly /bin/bash	
 
+## Push manually to Docker repo (Docker-Hub)
 
+To push the image to a docker repo: 
+
+
+	docker build -t imixs/wildfly:X.X.X .
+	
+	docker push imixs/wildfly:X.X.X
+											
