@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
   ~ JBoss, Home of Professional Open Source.
   ~ Copyright 2011, Red Hat, Inc., and individual contributors
@@ -21,15 +20,14 @@
   ~ Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
   ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
   -->
-
 <!-- Represents the EclipseLink module  -->
-<module xmlns="urn:jboss:module:1.5" name="org.eclipse.persistence">
+<module name="org.eclipse.persistence" xmlns="urn:jboss:module:1.5">
     <properties>
-        <property name="jboss.api" value="private"/>
+        <property name="jboss.api" value="public"/>
     </properties>
 
     <resources>
-        <resource-root path="jipijapa-eclipselink-11.0.0.Final.jar"/>
+        <resource-root path="jipijapa-eclipselink-12.0.0.Final.jar"/>
         <resource-root path="eclipselink.jar">
 			<filter>
 		        <exclude path="javax/**" />
@@ -38,7 +36,6 @@
     </resources>
 
     <dependencies>
-        <module name="asm.asm"/>
         <module name="javax.api"/>
         <module name="javax.annotation.api"/>
         <module name="javax.enterprise.api"/>
@@ -48,7 +45,6 @@
         <module name="javax.xml.bind.api"/>
         <module name="org.antlr"/>
         <module name="org.dom4j"/>
-        <module name="org.javassist"/>
         <module name="org.jboss.as.jpa.spi"/>
         <module name="org.jboss.logging"/>
         <module name="org.jboss.vfs"/>
