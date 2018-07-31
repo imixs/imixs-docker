@@ -23,14 +23,11 @@ In addition the imixs wildfly image adds the eclipselink.jar into the module con
 
 imixs/wildfly provides the following environment variables
 
-<div>
-<ul>
-	<li>JAVA_HOME</li>
-	<li>WILDFLY_HOME (/opt/wildfly)</li>
-	<li>WILDFLY_DEPLOYMENT ($WILDFLY_HOME/standalone/deployments)</li>
-	<li>WILDFLY_CONFIG  ($WILDFLY_HOME/standalone/configuration)</li>
-</ul>
-</div>
+ * JAVA_HOME
+ * WILDFLY_HOME (/opt/wildfly)
+ * WILDFLY\_DEPLOYMENT ($WILDFLY_HOME/standalone/deployments)
+ * WILDFLY\_CONFIG  ($WILDFLY_HOME/standalone/configuration)
+
 
 ### Versions
 
@@ -39,6 +36,7 @@ The following image versions are available:
  * imixs/wildfly:1.2.2  =>  Wildfly 10.0.0.Final
  * imixs/wildfly:1.2.3  =>  Wildfly 11.0.0.Final
  * imixs/wildfly:1.2.4  =>  Wildfly 12.0.0.Final
+ * imixs/wildfly:1.2.5  =>  Wildfly 13.0.0.Final
  
 
 ## 1. Install Docker
