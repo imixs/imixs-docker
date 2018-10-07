@@ -1,4 +1,4 @@
-FROM openjdk:8
+FROM openjdk:10
 
 MAINTAINER Ralph Soika <ralph.soika@imixs.com>
 
