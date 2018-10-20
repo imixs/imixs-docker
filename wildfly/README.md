@@ -1,7 +1,7 @@
 # imixs/wildfly
 
 
-This imixs/wildfly Docker image runs the Java application server [WildFly](http://www.wildfly.org) in the latest version on OpenJDK 8. 
+This imixs/wildfly Docker image runs the Java application server [WildFly](http://www.wildfly.org) in the latest version on OpenJDK 10. 
 The image is based on the official OpenJDK Docker Image. 
 
 In addition the imixs wildfly image adds the eclipselink.jar into the module configuration of wildfly and JDBC driver support for PostgreSQL. 
@@ -9,8 +9,9 @@ In addition the imixs wildfly image adds the eclipselink.jar into the module con
 [![](https://images.microbadger.com/badges/image/imixs/wildfly.svg)](https://microbadger.com/images/imixs/wildfly "Get your own image badge on microbadger.com")
 
 ## Features
-* inherit form officeal openJDK
-* runs wildfly with OpenJDK 8
+* inherit form officeal openJDK image
+* runs latest wildfly with OpenJDK 10
+* uses a non-privileged system user
 * starts wildfly in standalone mode with management console
 * creates an admin user on first usage
 * adds support of eclipselink
@@ -122,7 +123,7 @@ If you share a volume from your host to container, make sure that the user 901 h
 For Java enterprise applications you often need an additional database server. You can link the wildfly container to a database container using the docker overlay network which is automatically provided by docker. Within this network you can access a database server via  the docker servcice name. See the following docker-compose.yml file
 d
 
-	version: "3"
+	version: "3.1"
 	services:
 	
 	  postgres:
