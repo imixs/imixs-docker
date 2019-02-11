@@ -47,7 +47,7 @@ Exim4 has a default MESSAGE\_SIZE\_LIMIT of 50M. Exim4 will reject emails with l
 
 Example:
 
-	-e EXIM_MESSAGE_SIZE_LIMIT="100M" 
+	-e EXIM_MESSAGE_SIZE_LIMIT=100M 
 
 Within your imixs/exim4 docker container you can verify the current setting with the command:
 

@@ -21,7 +21,7 @@ echo "CFILEMODE='644'" >> $conf
 if [[ -v EXIM_MESSAGE_SIZE_LIMIT ]]
   then
   	echo "...setting MESSAGE_SIZE_LIMIT to $EXIM_MESSAGE_SIZE_LIMIT ..."
-	echo "MESSAGE_SIZE_LIMIT='$EXIM_MESSAGE_SIZE_LIMIT'" >> $conf
+	echo "MESSAGE_SIZE_LIMIT=$EXIM_MESSAGE_SIZE_LIMIT" >> $conf
 fi
 
 
