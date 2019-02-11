@@ -1,4 +1,4 @@
-# imixs/smarthost
+# imixs/exim4
 
 This Docker image provides a mail transfer agent (MTA) running as a smarthost for Docker containers. The container can be used to send out e-mails from other containers.
 
@@ -12,11 +12,13 @@ The Docker image is based on debian:jessie.
 
 ### Environment
 
-imixs/smarthost provides the following environment variables
+imixs/exim4 provides the following environment variables
 
 * EXIM_SMARTHOST - your target mail server 
 * EXIM_PASSWORD - authenticating to a remote host as a client.
 * EXIM\_ALLOWED\_SENDERS - allowed sender IP/Network addresses (default=172.17.0.0/24:127.0.0.1)
+* EXIM\_MESSAGE\_SIZE\_LIMIT - overwrites the default message_size_limit of 50m 
+
 
 
 ## 1. Install Docker
@@ -29,7 +31,7 @@ The container can be started in background as an demon. You can start an instanc
     docker run --name="smarthost" -d \
 	-e EXIM_SMARTHOST="target.mail.server.example:25" \
 	-e EXIM_PASSWORD="target.mail.server.example:login:password" \
-	imixs/smarthost 
+	imixs/exim4 
 
 The environment parameter 'EXIM_SMARTHOST' points to the target mail sever used by exim4.
 The environment parameter 'EXIM_PASSWORD' is written to the exim4/passwd file. This parameter contains the target mail server, user and login data.
@@ -37,6 +39,15 @@ The environment parameter 'EXIM_PASSWORD' is written to the exim4/passwd file. T
 To stop and remove the Docker container run the Docker command: 
 
     docker stop smarthost && docker rm smarthost
+
+
+#### The MESSAGE\_SIZE\_LIMIT
+
+Exim4 has a default MESSAGE\_SIZE\_LIMIT of 50M. Exim4 will reject emails with larger size to avoid spam mail. You can set different size here if you provide the environment variable named 'EXIM\_MESSAGE\_SIZE\_LIMIT'.
+
+Example:
+
+	-e EXIM_MESSAGE_SIZE_LIMIT="100M" 
 
 
 ## 3. Testing
@@ -75,13 +86,13 @@ The source is available on [Github](https://github.com/imixs/imixs-docker). Plea
 
 To build the image from the Dockerfile run: 
 
-    docker build --tag=imixs/smarthost .
+    docker build --tag=imixs/exim4 .
 
 ## Push manually to Docker repo (Docker-Hub)
 
 To push the image to a docker repo: 
 
 
-	docker build -t imixs/smarthost:X.X.X .
+	docker build -t imixs/exim4:X.X.X .
 	
-	docker push imixs/smarthost:X.X.X 
+	docker push imixs/exim4:X.X.X 

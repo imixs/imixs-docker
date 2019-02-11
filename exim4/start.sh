@@ -11,11 +11,19 @@ echo "dc_relay_domains=''" >> $conf
 echo "dc_minimaldns='false'" >> $conf
 echo "dc_relay_nets='$EXIM_ALLOWED_SENDERS'" >> $conf
 echo "dc_smarthost='$EXIM_SMARTHOST'" >> $conf
-echo "CFILEMODE='644'" >> $conf
 echo "dc_use_split_config='false'" >> $conf
 echo "dc_hide_mailname='true'" >> $conf
 echo "dc_mailname_in_oh='true'" >> $conf
 echo "dc_localdelivery='mail_spool'" >> $conf
+echo "CFILEMODE='644'" >> $conf
+
+# Test if EXIM_MESSAGE_SIZE_LIMIT if set?..
+if [[ -v EXIM_MESSAGE_SIZE_LIMIT ]]
+  then
+  	echo "...setting MESSAGE_SIZE_LIMIT to $EXIM_MESSAGE_SIZE_LIMIT ..."
+	echo "MESSAGE_SIZE_LIMIT='$EXIM_MESSAGE_SIZE_LIMIT'" >> $conf
+fi
+
 
 
 # Update passwd.client
