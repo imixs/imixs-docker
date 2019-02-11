@@ -49,6 +49,9 @@ Example:
 
 	-e EXIM_MESSAGE_SIZE_LIMIT="100M" 
 
+Within your imixs/exim4 docker container you can verify the current setting with the command:
+
+	$ exim4 -bP message_size_limit 
 
 ## 3. Testing
 
