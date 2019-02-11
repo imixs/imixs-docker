@@ -49,6 +49,8 @@ Example:
 
 	-e EXIM_MESSAGE_SIZE_LIMIT=100M 
 
+**Note:** The value must be set as an integer and may not be surrounded in quotes. (100M = 100 MB, where 104857600 is the same value in bytes)
+
 Within your imixs/exim4 docker container you can verify the current setting with the command:
 
 	$ exim4 -bP message_size_limit 
