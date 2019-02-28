@@ -9,6 +9,8 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man/?? /usr/share/man/??_*
 
+# disable default crontab
+COPY crontab /etc/crontab
 # add the backup scripts into root/home
 ADD backup.sh /root/backup.sh
 RUN chmod +x /root/backup.sh
