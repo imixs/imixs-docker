@@ -1,11 +1,11 @@
-FROM postgres:9.6.1
+FROM debian:stretch
 
 MAINTAINER Ralph Soika <ralph.soika@imixs.com>
 
 # install packages: psql and slim down image
 RUN apt-get update \
  && apt-get install --no-install-recommends -y \
-  cron ssh mysql-client \
+  cron ssh mysql-client postgresql-client \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man/?? /usr/share/man/??_*
 
