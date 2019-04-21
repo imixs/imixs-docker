@@ -1,12 +1,12 @@
-# imixs/ocr
+# imixs/tika
 
-The Docker Image 'imixs/ocr' provides a Tika / Tesseract installation
+The Docker Image 'imixs/tika' provides a Tika Server. This server can be used for OCR via a Rest API provided by the [Apache Tika Project](https://tika.apache.org/)
 
 ## Features
 
 * inherit form official openJDK
 * runs tika and tesseract with OpenJDK 10
-* suported languages: de, en
+* supported languages: de, en
 
 
 ## The Rest API
@@ -30,13 +30,21 @@ Examples:
 	
 
 
-# 2. Running and stopping a container
+# Running and stopping a container
 
 You can start an instance of the postgres service with the Docker run command:
 
-	docker run --name="ocr" \
+	docker run --name="tika" \
 	    -p 9998:9998 \
-	    imixs/ocr
+	    imixs/tika
+
+## Docker Swarm
+
+The imixs/tiker image can perfectly be used in a docker swarm environment. So you have a single service providing OCR functionallity via a Rest API.
+
+## Imixs-Archive
+ 
+The [Imixs-Archive Project](https://github.com/imixs/imixs-archive/tree/master/imixs-archive-documents) provides a Imixs-Workflow plugin to be used for OCR. 
 
 
 # Contribute
@@ -49,8 +57,14 @@ Checkout the sources from GitHub:
 
 To build the image from the Dockerfile run: 
 
-    docker build --tag=imixs/ocr ./ocr
+    $ docker build --tag=imixs/tika ./tika
+
+## Push manually to Docker repo (Docker-Hub)
+
+To push the image to a docker repo: 
 
 
+	$ docker build -t imixs/tika:X.X.X .
+	$ docker push imixs/tika:X.X.X 
 	
 	
