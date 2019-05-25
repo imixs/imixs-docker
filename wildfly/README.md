@@ -184,7 +184,7 @@ To build the image from the Dockerfile run:
 
 To test the image run the container in an interactive mode:
     
-	docker run --name="wildfly" -it \
+	docker run --rm --name="wildfly" -it \
 			-p 8080:8080 -p 9990:9990 \
 			-e WILDFLY_PASS="admin_password" \
 			imixs/wildfly
