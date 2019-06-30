@@ -23,7 +23,7 @@ ENV DEBUG=false
 
 # Add the WildFly distribution to /opt, and make wildfly the owner of the extracted tar content
 # Make sure the distribution is available from a well-known place
-RUN curl http://download.jboss.org/wildfly/$WILDFLY_VERSION/wildfly-$WILDFLY_VERSION.tar.gz | tar zx \
+RUN curl -L http://download.jboss.org/wildfly/$WILDFLY_VERSION/wildfly-$WILDFLY_VERSION.tar.gz | tar zx \
  && ln -s $WILDFLY_HOME-$WILDFLY_VERSION/ $WILDFLY_HOME  
 	
 # Add the Wildfly start script 
