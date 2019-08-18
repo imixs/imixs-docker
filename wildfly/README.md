@@ -40,7 +40,8 @@ The following image versions are available:
  * imixs/wildfly:1.2.5  =>  Wildfly 13.0.0.Final (OpenJDK 8)
  * imixs/wildfly:1.2.6  =>  Wildfly 13.0.0.Final (OpenJDK 10)
  * imixs/wildfly:1.2.7  =>  Wildfly 15.0.1.Final (OpenJDK 10)
- * imixs/wildfly:latest =>  Wildfly 16.0.0.Final (OpenJDK 10, Microprofile Metrics v2.0.0)
+ * imixs/wildfly:1.2.8  =>  Wildfly 16.0.0.Final (OpenJDK 10)
+ * imixs/wildfly:latest =>  Wildfly 17.0.1.Final (OpenJDK 10)
 
 
 ## 1. Install Docker
