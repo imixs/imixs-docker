@@ -61,8 +61,8 @@ then
 	
 	# create the target dir....
 sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST << SFTPEOF 
-          mkdir /imixs-cloud
-          mkdir /imixs-cloud/$BACKUP_SERVICE_NAME/
+          mkdir /$BACKUP_ROOT_DIR
+          mkdir /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/
           quit
 SFTPEOF
 	

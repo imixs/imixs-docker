@@ -1,6 +1,6 @@
 FROM postgres:11.2
 
-MAINTAINER Ralph Soika <ralph.soika@imixs.com>
+LABEL authors="Ralph Soika <ralph.soika@imixs.com>, Simone Fardella <fardella.simone@gmail.com>"
 
 # install packages: psql and slim down image
 RUN apt-get update \
