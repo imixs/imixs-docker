@@ -47,6 +47,12 @@ echo "user=$BACKUP_DB_USER" >> ~/.my.cnf
 echo "password=$BACKUP_DB_PASSWORD" >> ~/.my.cnf
 chmod 0600 ~/.my.cnf
 
+if [ "$BACKUP_ROOT_DIR" == "" ]
+  then
+     # If the Backup root dir is not specified, it will use the default /imixs-cloud...
+     BACKUP_ROOT_DIR="/imixs-cloud"
+fi
+
 # copy the ssh key for backup space if defined...
 if [ -f /run/secrets/backupspace_key ]
 then

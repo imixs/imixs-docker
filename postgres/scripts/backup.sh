@@ -121,6 +121,11 @@ if [ "$BACKUPS_EXIST_LOCAL" -gt "$BACKUP_LOCAL_ROLLING" ]
      ls -F /root/backups/*_dump.tar.gz | head -n -$BACKUP_LOCAL_ROLLING | xargs rm
 fi
 
+if [ "$BACKUP_ROOT_DIR" == "" ]
+  then
+     # If the Backup root dir is not specified, it will use the default /imixs-cloud...
+     BACKUP_ROOT_DIR="/imixs-cloud"
+fi
 
 # ****************************************************
 # Copy Backup Files into the Backup Space
