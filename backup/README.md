@@ -16,7 +16,7 @@ The service is designed to backup only one database. In case you want to use thi
 * restore feature.
 
 ## Environment
-The imixs/backup image is based on the [official postgres image](https://hub.docker.com/_/postgres/) with additional mysql-client support.
+The imixs/backup image is based on the [official postgres image](https://hub.docker.com/_/postgres/) with additional mariadb-client support.
 
 imixs/backup provides the following environment variables which need to be set during container startup:
 
@@ -157,6 +157,7 @@ If you add a backup space the following optional environment settings are needed
 	      BACKUP_SPACE_HOST: "my-backup.org"
 	      BACKUP_SPACE_USER: "yyyy"
 	      BACKUP_SPACE_KEY_FILE: "/run/secrets/backupspace_key"
+	      BACKUP_ROOT_DIR: "/imixs-cloud"
 	....
 
 If you want to backup file directories form a mounted volume:
