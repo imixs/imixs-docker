@@ -121,6 +121,14 @@ if [ "$BACKUPS_EXIST_LOCAL" -gt "$BACKUP_LOCAL_ROLLING" ]
      ls -F /root/backups/*_dump.tar.gz | head -n -$BACKUP_LOCAL_ROLLING | xargs rm
 fi
 
+if [ "$BACKUP_ROOT_DIR" == "" ]
+  then
+     # If the Backup root dir is not specified, it will use the default /imixs-cloud...
+     echo "***        ...Environment variable BACKUP_ROOT_DIR not set, using default /imixs-cloud folder..."
+
+     BACKUP_ROOT_DIR="/imixs-cloud"
+fi
+
 
 # ****************************************************
 # Copy Backup Files into the Backup Space
@@ -130,7 +138,7 @@ if [ "$BACKUP_SPACE_HOST" != "" ]
      echo "***        ...upload to backup space..."
      
      sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST > /dev/null << SFTPEOF 
-       cd /imixs-cloud/$BACKUP_SERVICE_NAME/
+       cd /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/
        put $BACKUP_FILE 
        quit
 SFTPEOF
@@ -141,12 +149,12 @@ SFTPEOF
   # ****************************************************
 
   # first we count the existing backup files in the backup space
-  BACKUPS_EXIST_SPACE=$(echo ls -l /imixs-cloud/$BACKUP_SERVICE_NAME/*_dump.tar.gz | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep -v ^l | wc -l)
+  BACKUPS_EXIST_SPACE=$(echo ls -l /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/*_dump.tar.gz | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep -v ^l | wc -l)
   # now we remove the files if we have more than defined BACKUP_SPACE_ROLLING...
   if [ "$BACKUPS_EXIST_SPACE" -gt "$BACKUP_SPACE_ROLLING" ] 
     then 
        # get a list of all dump files (tricky command because ls -t does not work)...
-       RESULT=`echo "ls /imixs-cloud/$BACKUP_SERVICE_NAME/*_dump.*" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep .tar.gz | sort -Vr`
+       RESULT=`echo "ls /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/*_dump.*" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep .tar.gz | sort -Vr`
        
        # remove the deprecated backup files...
        i=0

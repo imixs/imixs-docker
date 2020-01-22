@@ -47,6 +47,13 @@ echo "user=$BACKUP_DB_USER" >> ~/.my.cnf
 echo "password=$BACKUP_DB_PASSWORD" >> ~/.my.cnf
 chmod 0600 ~/.my.cnf
 
+if [ "$BACKUP_ROOT_DIR" == "" ]
+  then
+     # If the Backup root dir is not specified, it will use the default /imixs-cloud...
+     echo "***        ...Environment variable BACKUP_ROOT_DIR not set, using default /imixs-cloud folder..."
+
+     BACKUP_ROOT_DIR="/imixs-cloud"
+fi
 
 # copy the ssh key for backup space if defined...
 if [ -f /run/secrets/backupspace_key ]
@@ -61,8 +68,8 @@ then
 	
 	# create the target dir....
 sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST << SFTPEOF 
-          mkdir /imixs-cloud
-          mkdir /imixs-cloud/$BACKUP_SERVICE_NAME/
+          mkdir /$BACKUP_ROOT_DIR
+          mkdir /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/
           quit
 SFTPEOF
 	

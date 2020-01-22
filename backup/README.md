@@ -16,7 +16,7 @@ The service is designed to backup only one database. In case you want to use thi
 * restore feature.
 
 ## Environment
-The imixs/backup image is based on the [official postgres image](https://hub.docker.com/_/postgres/) with additional mysql-client support.
+The imixs/backup image is based on the [official postgres image](https://hub.docker.com/_/postgres/) with additional mariadb-client support.
 
 imixs/backup provides the following environment variables which need to be set during container startup:
 
@@ -32,7 +32,7 @@ imixs/backup provides the following environment variables which need to be set d
 * BACKUP\_SPACE\_USER - backup space user 
 * BACKUP\_LOCAL\_ROLLING - number of backup files to be kept locally
 * BACKUP\_SPACE\_ROLLING - number of backup files to be kept in the backup space
-
+* BACKUP\_ROOT\_DIR - backup root directory (e.g. "/imixs-cloud", default if not set will be "/imixs-cloud")
 
 All backups are located in the following local directory 
 
@@ -40,7 +40,7 @@ All backups are located in the following local directory
 
 In the backup space, the files are located at:
 
-	/imixs-cloud/$BACKUP_SERVICE_NAME/
+	/$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/
 	
 Each backup file has a time stamp prefix indicating the backup time:
 
@@ -80,9 +80,11 @@ The backup script automatically holds a number of backup files locally. The defa
 In case the optional environment variable "BACKUP\_SPACE\_HOST" is provided, the service will push backup files automatically into a backup space via SFTP/SCP.
 The backup directory on the backup space is
 
-    /imixs-cloud/$BACKUP_SERVICE_NAME/....
+    /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/....
     
 The optional environment variable  "BACKUP\_SERVICE\_NAME" can be set to name the backup directory on the backup space. If no service name is set, the docker container ID will be used instead.  
+
+In case the optional environment variable "BACKUP\_SPACE\_HOST" is provided, the environment variable  "BACKUP\_ROOT\_DIR" can be set to name the backup directory on the backup space, otherwise it will be used the default "/imixs-cloud" folder.  
 
 #### Create a SSH Key
 
@@ -155,6 +157,7 @@ If you add a backup space the following optional environment settings are needed
 	      BACKUP_SPACE_HOST: "my-backup.org"
 	      BACKUP_SPACE_USER: "yyyy"
 	      BACKUP_SPACE_KEY_FILE: "/run/secrets/backupspace_key"
+	      BACKUP_ROOT_DIR: "/imixs-cloud"
 	....
 
 If you want to backup file directories form a mounted volume:
@@ -230,11 +233,11 @@ In case you have no local backup files available, you can pull a backup file fir
 
 Run the following command to get a list of all backup files available on the backupspace:
 
-	echo ls -la /imixs-cloud/$BACKUP_SERVICE_NAME | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST
+	echo ls -la /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST
 
 You can pull a specific backup file with the script backup_get.sh followed by the filename:
 
-	/root/backup_get.sh /imixs-cloud/$BACKUP_SERVICE_NAME/[BACKUPFILE]
+	/root/backup_get.sh /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/[BACKUPFILE]
 
 
 The remote backupfile will be written to the directory /root/backups/.  Now you can restore the backup as explained before. 
