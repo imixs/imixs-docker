@@ -124,6 +124,8 @@ fi
 if [ "$BACKUP_ROOT_DIR" == "" ]
   then
      # If the Backup root dir is not specified, it will use the default /imixs-cloud...
+     echo "***        ...Environment variable BACKUP_ROOT_DIR not set, using default /imixs-cloud folder..."
+
      BACKUP_ROOT_DIR="/imixs-cloud"
 fi
 
