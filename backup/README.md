@@ -32,7 +32,7 @@ imixs/backup provides the following environment variables which need to be set d
 * BACKUP\_SPACE\_USER - backup space user 
 * BACKUP\_LOCAL\_ROLLING - number of backup files to be kept locally
 * BACKUP\_SPACE\_ROLLING - number of backup files to be kept in the backup space
-* BACKUP\_ROOT\_DIR - backup root directory (e.g. "/imixs-cloud")
+* BACKUP\_ROOT\_DIR - backup root directory (e.g. "/imixs-cloud", default if not set will be "/imixs-cloud")
 
 All backups are located in the following local directory 
 
@@ -84,7 +84,7 @@ The backup directory on the backup space is
     
 The optional environment variable  "BACKUP\_SERVICE\_NAME" can be set to name the backup directory on the backup space. If no service name is set, the docker container ID will be used instead.  
 
-In case the optional environment variable "BACKUP\_SPACE\_HOST" is provided, the environment variable  "BACKUP\_ROOT\_DIR" must be set to name the backup directory on the backup space.  
+In case the optional environment variable "BACKUP\_SPACE\_HOST" is provided, the environment variable  "BACKUP\_ROOT\_DIR" can be set to name the backup directory on the backup space, otherwise it will be used the default "/imixs-cloud" folder.  
 
 #### Create a SSH Key
 
