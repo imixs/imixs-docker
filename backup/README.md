@@ -22,7 +22,7 @@ imixs/backup provides the following environment variables which need to be set d
 
 * SETUP\_CRON - the cron timer setting (e.g. "0 3 * * *")
 * BACKUP\_SERVICE\_NAME - name of the backup service (defines the target folder on FTP space)
-* BACKUP\_DB\_HOST - datbase server
+* BACKUP\_DB\_HOST - database server
 * BACKUP\_DB\_USER - database user
 * BACKUP\_DB\_PASSWORD - database user password
 * BACKUP\_DB\_TYPE - set to 'MYSQL' or 'POSTGRESQL' 
@@ -33,6 +33,9 @@ imixs/backup provides the following environment variables which need to be set d
 * BACKUP\_LOCAL\_ROLLING - number of backup files to be kept locally
 * BACKUP\_SPACE\_ROLLING - number of backup files to be kept in the backup space
 * BACKUP\_ROOT\_DIR - backup root directory (e.g. "/imixs-cloud", default if not set will be "/imixs-cloud")
+* EXIM\_SMARTHOST\_NAME - the container name of Exim smarthost service, it can be an instance of the imixs/exim4 service
+* EXIM\_SMARTHOST\_FROM - the sender to use while sending the success job email
+* EXIM\_SMARTHOST\_TO - the recipient to use while sending the success job email
 
 All backups are located in the following local directory 
 
@@ -85,6 +88,18 @@ The backup directory on the backup space is
 The optional environment variable  "BACKUP\_SERVICE\_NAME" can be set to name the backup directory on the backup space. If no service name is set, the docker container ID will be used instead.  
 
 In case the optional environment variable "BACKUP\_SPACE\_HOST" is provided, the environment variable  "BACKUP\_ROOT\_DIR" can be set to name the backup directory on the backup space, otherwise it will be used the default "/imixs-cloud" folder.  
+
+
+### Automated email after successful job execution
+
+The backup script supports a basic email report that can be enabled if the followings environment variables are not none:
+
+* EXIM\_SMARTHOST\_NAME
+* EXIM\_SMARTHOST\_FROM
+* EXIM\_SMARTHOST\_TO 
+
+Those fields are pretty self-explanatory, in any case, you have to provide the smarthost service name (or ip) and the respective sender and recipient
+
 
 #### Create a SSH Key
 
@@ -169,7 +184,16 @@ If you want to backup file directories form a mounted volume:
          - appdata:/home/imixs
     ....
     
+If you want to get a mail report on every success backup job, the following optional environment settings are needed:
+
+
+	....
+	      EXIM_SMARTHOST_NAME: "smarthost"
+	      EXIM_SMARTHOST_FROM: "backupagent@yourcompany.com"
+	      EXIM_SMARTHOST_TO: "sysadmin@yourcompany.com"
+	....
     
+
 ## Manual Backup
 
 A backup can be started manually by the backup script. The backup script can be run either from outside the container: 
