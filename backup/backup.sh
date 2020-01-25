@@ -179,30 +179,35 @@ BACKUP_VOLUME_DATA="$(ls -lah $BACKUP_VOLUME)"
 if [ "$EXIM_SMARTHOST_NAME" != "" ] && [ "$EXIM_SMARTHOST_FROM" != "" ] && [ "$EXIM_SMARTHOST_TO" != "" ] ;
   then
      echo "***        ...Dispatching backup result email to smarthost container..."
-nc $EXIM_SMARTHOST_NAME 25 -i 2 > /dev/null << NCEOF
-mail from: $EXIM_SMARTHOST_FROM
-rcpt to: $EXIM_SMARTHOST_TO
-data
-From: <$EXIM_SMARTHOST_FROM>
-To: <$EXIM_SMARTHOST_TO>
-Subject: Backup job task completed ($BACKUP_DB)
-Hi,
-This automatic mail was sent from the backup engine.
 
-JOB-INFO:
+     (echo -n; sleep 1; cat << EMAILCMDEOF
+     mail from: $EXIM_SMARTHOST_FROM
+     rcpt to: $EXIM_SMARTHOST_TO
+     data
+     From: <$EXIM_SMARTHOST_FROM>
+     To: <$EXIM_SMARTHOST_TO>
+     Subject: Backup job task completed ($BACKUP_DB)
+     Hi,
+     This automatic mail was sent from the backup engine.
 
-- Backed-up $BACKUP_DB_TYPE database: $BACKUP_DB
-- Backed-up volume: $BACKUP_VOLUME
-- Backed-up volume data: $BACKUP_VOLUME_DATA
+     JOB-INFO:
 
-The backup was completed at $BACKUP_DATE - The following backup file was created: $BACKUP_FILE
+     Backed-up $BACKUP_DB_TYPE database: $BACKUP_DB
+     Backed-up volume: $BACKUP_VOLUME
 
-Remote host off-site backup location: /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/$BACKUP_FILE
-.
-quit
-NCEOF
+     Backed-up volume data:
+     $BACKUP_VOLUME_DATA
+
+     The backup was completed at $BACKUP_DATE - The following backup file was created: $BACKUP_FILE
+
+     Remote host off-site backup location: /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/$BACKUP_FILE
+     .
+     quit
+EMAILCMDEOF
+) | while read line; do sleep "1"; echo "$line"; done | nc $EXIM_SMARTHOST_NAME 25 > /dev/null
+
+
 fi
-
 
 
 echo "*** Backup completed successfully."
