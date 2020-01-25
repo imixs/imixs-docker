@@ -40,6 +40,23 @@ To stop and remove the Docker container run the Docker command:
 
     docker stop smarthost && docker rm smarthost
 
+## 3. How to Deploy the Service
+The imixs/exim4 service is supposed to be run as part of a docker service stack. This means that the service is included in a docker-compose.yml file which already contains all the environment variables as shown in the first part of this readme.
+
+The following example shows a service definition of the exim4 service ready to act as smarthost for Office365.
+
+	...
+	  smarthost:
+	    image: imixs/exim4:latest
+	    environment:
+	      EXIM_SMARTHOST: "smtp.office365.com:587"
+	      EXIM_PASSWORD: "*.office.com:sender@mycompany.com:mypassword"
+	      EXIM_MESSAGE_SIZE_LIMIT: "1M"
+	      EXIM_ALLOWED_SENDERS: "10.1.7.0/24"
+	   
+      	....
+      	
+Please note that for Office365 it must be configured all the Microsoft DNS wildcard.
 
 #### The MESSAGE\_SIZE\_LIMIT
 
