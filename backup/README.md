@@ -33,7 +33,7 @@ imixs/backup provides the following environment variables which need to be set d
 * BACKUP\_LOCAL\_ROLLING - number of backup files to be kept locally
 * BACKUP\_SPACE\_ROLLING - number of backup files to be kept in the backup space
 * BACKUP\_ROOT\_DIR - backup root directory (e.g. "/imixs-cloud", default if not set will be "/imixs-cloud")
-* EXIM\_SMARTHOST\_NAME - the container name of Exim smarthost service, it can be an instance of the imixs/exim4 service
+* EXIM\_SMARTHOST\_NAME - the container name of Exim smarthost service, it can be an instance of the [imixs/exim4 service](https://github.com/imixs/imixs-docker/blob/master/exim4/README.md)
 * EXIM\_SMARTHOST\_FROM - the sender to use while sending the success job email
 * EXIM\_SMARTHOST\_TO - the recipient to use while sending the success job email
 
@@ -90,17 +90,6 @@ The optional environment variable  "BACKUP\_SERVICE\_NAME" can be set to name th
 In case the optional environment variable "BACKUP\_SPACE\_HOST" is provided, the environment variable  "BACKUP\_ROOT\_DIR" can be set to name the backup directory on the backup space, otherwise it will be used the default "/imixs-cloud" folder.  
 
 
-### Automated email after successful job execution
-
-The backup script supports a basic email report that can be enabled if the followings environment variables are not none:
-
-* EXIM\_SMARTHOST\_NAME
-* EXIM\_SMARTHOST\_FROM
-* EXIM\_SMARTHOST\_TO 
-
-Those fields are pretty self-explanatory, in any case, you have to provide the smarthost service name (or ip) and the respective sender and recipient
-
-
 #### Create a SSH Key
 
 To transfers files to the backup space this service uses SFTP/SCP. For this reason a RFC4716 Public Key need to be provided on the backup space. 
@@ -134,14 +123,21 @@ You can add the key as an environment variable to the stack definition:
 
 	     
 
+### Automated email notification after successful job execution
+
+The backup script supports an optional email report that can be enabled if the followings environment variables are not none:
+
+* EXIM\_SMARTHOST\_NAME
+* EXIM\_SMARTHOST\_FROM
+* EXIM\_SMARTHOST\_TO 
+
+Those fields are pretty self-explanatory, in any case, you have to provide the smarthost service name (or ip) and the respective sender and recipient. See the [imixs/exim4 service](https://github.com/imixs/imixs-docker/blob/master/exim4/README.md) for how to setup a smarthost mail service with Docker or Docker-Compose. 
 
 ## How to Deploy the Service
 
 The imixs/backup service is supposed to be run as part of a docker service stack. This means that the service is included in a docker-compose.yml file which already contains PQSL or MYSQL Database Server and optional a mounted volume. The database service is typically bound using an internal network.
  
 The following example shows a service definition of the backup service to backup a Wordpress Service with a MySQL database and a volume named 'wp-content' containing the wordpress content. 
-
-
 
 	...
 	  backup:
