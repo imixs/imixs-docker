@@ -200,7 +200,8 @@ if [ "$EXIM_SMARTHOST_NAME" != "" ] && [ "$EXIM_SMARTHOST_FROM" != "" ] && [ "$E
 
      The backup was completed at $BACKUP_DATE - The following backup file was created: $BACKUP_FILE
 
-     Remote host off-site backup location: /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/$BACKUP_FILE
+     Local host backup file location: $BACKUP_SERVICE_NAME/$BACKUP_FILE
+     Remote host off-site backup location: $BACKUP_ROOT_DIR/$BACKUP_FILE
      .
      quit
 EMAILCMDEOF
