@@ -33,9 +33,9 @@ imixs/backup provides the following environment variables which need to be set d
 * BACKUP\_LOCAL\_ROLLING - number of backup files to be kept locally
 * BACKUP\_SPACE\_ROLLING - number of backup files to be kept in the backup space
 * BACKUP\_ROOT\_DIR - backup root directory (e.g. "/imixs-cloud", default if not set will be "/imixs-cloud")
-* EXIM\_SMARTHOST\_NAME - the container name of Exim smarthost service, it can be an instance of the [imixs/exim4 service](https://github.com/imixs/imixs-docker/blob/master/exim4/README.md)
-* EXIM\_SMARTHOST\_FROM - the sender to use while sending the success job email
-* EXIM\_SMARTHOST\_TO - the recipient to use while sending the success job email
+* BACKUP\_EMAIL\_SMARTHOST - the container name of Exim smarthost service, it can be an instance of the [imixs/exim4 service](https://github.com/imixs/imixs-docker/blob/master/exim4/README.md)
+* BACKUP\_EMAIL\_FROM - the sender to use while sending the success job email
+* BACKUP\_EMAIL\_TO - the recipient to use while sending the success job email
 
 All backups are located in the following local directory 
 
@@ -127,9 +127,9 @@ You can add the key as an environment variable to the stack definition:
 
 The backup script supports an optional email report that can be enabled if the followings environment variables are not none:
 
-* EXIM\_SMARTHOST\_NAME
-* EXIM\_SMARTHOST\_FROM
-* EXIM\_SMARTHOST\_TO 
+* BACKUP\_EMAIL\_SMARTHOST
+* BACKUP\_EMAIL\_FROM
+* BACKUP\_EMAIL\_TO 
 
 Those fields are pretty self-explanatory, in any case, you have to provide the smarthost service name (or ip) and the respective sender and recipient. See the [imixs/exim4 service](https://github.com/imixs/imixs-docker/blob/master/exim4/README.md) for how to setup a smarthost mail service with Docker or Docker-Compose. 
 
@@ -184,9 +184,9 @@ If you want to get a mail report on every success backup job, the following opti
 
 
 	....
-	      EXIM_SMARTHOST_NAME: "smarthost"
-	      EXIM_SMARTHOST_FROM: "backupagent@yourcompany.com"
-	      EXIM_SMARTHOST_TO: "sysadmin@yourcompany.com"
+	      BACKUP_EMAIL_SMARTHOST: "smarthost"
+	      BACKUP_EMAIL_FROM: "backupagent@yourcompany.com"
+	      BACKUP_EMAIL_TO: "sysadmin@yourcompany.com"
 	....
     
 
