@@ -32,7 +32,7 @@ file_env() {
 file_env 'BACKUP_DB_PASSWORD'
 
 
-# export all environment variables starting with 'BACKUP_' to be used by cron 
+# export all environment variables starting with 'BACKUP_' to be used by cron
 env | sed 's/^\(.*\)$/export \1/g' | grep -E "^export BACKUP_" > /root/backup.properties
 chmod +x /root/backup.properties
 
