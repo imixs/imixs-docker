@@ -3,7 +3,7 @@
 
 The imixs/postgres Docker image runs the [Postgres Database](https://www.postgresql.org/) service based on the [official postgres images](https://hub.docker.com/_/postgres). 
 
-The image extends runs on the latest version and extends the image with additional backup and restore scripts. 
+The image extends runs on the latest version and extends the image with additional backup and restore scripts. The backup feature can be configured in the same way as the imixs/backup image. See details [here](../backup/README.md). 
 
 
 ## Features
@@ -24,45 +24,35 @@ Follow the [Docker installation instructions](https://docs.docker.com/engine/ins
 ## 2. Running and stopping a container
 You can start an instance of the postgres service with the Docker run command:
 
-    docker run --name="postgres" -d \
-        -p 8080:8080 -p 9990:9990 \
-        -e POSTGRES_PASSWORD="db_password" \
-        -e POSTGRES_USER="postgres" \
-        -e POSTGRES_DB="database" \
-        imixs/postgres
- 
-## Execute PSQL
-
-On a running instance of Imixs/postgres you can execute PSQL commands in two differnt ways
-
- * connect to the running container
- * issue a remote call
+	docker run --name="postgres" -it --rm \
+	    -e SETUP_CRON="* 5 * * *" \
+	    -e BACKUP_DB_PASSWORD="xxxxxxxxxxx" \
+	    -e BACKUP_DB_HOST="db" \
+	    -e BACKUP_DB_TYPE="POSTGRES" \
+	    -e BACKUP_DB="wordpress" \
+	    imixs/postgres
  
 
-### Connecting to the running container
+     
+# Contribute
 
-To connect with the running container into the PSQL shell run:
-
-	docker exec -it  4c9b3cd89156 psql
-       
-### Issue a remote call
-
-
+The source is available on [Github](https://github.com/imixs/imixs-docker). Please [report any issues](https://github.com/imixs/imixs-docker/issues).
 
 
 ## Development
 
-To build the image from the Dockerfile run: 
+To build the image from the Dockerfile source file run: 
 
     docker build --tag=imixs/postgres .
     
-To start the postgres service in interactive mode run: 
+To test the backup service in interactive mode start the docker service: 
 
+	docker run --name="postgres" -it --rm \
+	    -e SETUP_CRON="*/1 * * * *" \
+	    -e BACKUP_DB_PASSWORD="xxxxxxxxxxx" \
+	    -e BACKUP_DB_HOST="db" \
+	    -e BACKUP_DB_TYPE="POSTGRES" \
+	    -e BACKUP_DB="wordpress" \
+	    imixs/postgres
 
-    docker run --name="postgres" -i --rm \
-        -p 8080:8080 -p 9990:9990 \
-        -e POSTGRES_PASSWORD="db_password" \
-        -e POSTGRES_USER="postgres" \
-        -e POSTGRES_DB="database" \
-        imixs/postgres
-    
+This will trigger the backup every minute. 

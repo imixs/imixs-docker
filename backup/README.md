@@ -265,9 +265,25 @@ The remote backupfile will be written to the directory /root/backups/.  Now you 
      
      
 # Contribute
+
 The source is available on [Github](https://github.com/imixs/imixs-docker). Please [report any issues](https://github.com/imixs/imixs-docker/issues).
 
-To build the image from the Dockerfile run: 
+
+## Development
+
+To build the image from the Dockerfile source file run: 
 
     docker build --tag=imixs/backup .
- 
+    
+To test the backup service in interactive mode start the docker service: 
+
+
+	docker run --name="backup" -it --rm \
+	    -e SETUP_CRON="*/1 * * * *" \
+	    -e BACKUP_DB_PASSWORD="xxxxxxxxxxx" \
+	    -e BACKUP_DB_HOST="db" \
+	    -e BACKUP_DB_TYPE="POSTGRES" \
+	    -e BACKUP_DB="wordpress" \
+	    imixs/backup
+
+This will trigger the backup every minute. 
