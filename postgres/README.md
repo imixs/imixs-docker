@@ -1,19 +1,16 @@
 # imixs/postgres
 
+The imixs/postgres Docker image runs a backup service for [Postgres Databases](https://www.postgresql.org/) using the [official postgres image](https://hub.docker.com/_/postgres). 
 
-The imixs/postgres Docker image runs the [Postgres Database](https://www.postgresql.org/) service based on the [official postgres images](https://hub.docker.com/_/postgres). 
-
-The image extends runs on the latest version and extends the image with additional backup and restore scripts. The backup feature can be configured in the same way as the imixs/backup image. See details [here](../backup/README.md). 
+The image runs version Postgres 12.2 and provides an backup and restore scripts. The backup feature can be configured in the same way as the imixs/backup image. See details [here](../backup/README.md). The image does not start a postgres database. The goal of the image is providing a backup/restore service for postgres services. 
 
 
 ## Features
-* inherit form officeal postgres image
-* runs latest postgres version
+* inherit form official postgres image
 * backup script to backup a database locally
 * restore script to restore from a local backup
 * remote backup script to create a remote rolling backup on a ftp space
 * remote restore script to restore a remote backup from a ftp space
-
 
 
 
