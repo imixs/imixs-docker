@@ -27,14 +27,16 @@ Examples:
 	$ curl -T test/zugferd_invoice.pdf http://localhost:9998/tika
 	$ curl -T test/IMG_20190421_133732.jpg http://localhost:9998/tika
 	
-	
+PDF File with embedded image
+
+	$ curl -T test/Dokument01.pdf http://localhost:9998/tika --header "X-Tika-PDFOcrStrategy: ocr_only"
 
 
 # Running and stopping a container
 
 You can start an instance of the postgres service with the Docker run command:
 
-	docker run --name="tika" \
+	docker run -it --rm --name="tika" \
 	    -p 9998:9998 \
 	    imixs/tika
 
