@@ -2,7 +2,7 @@ FROM openjdk:10
 
 LABEL maintainer="Ralph Soika <ralph.soika@imixs.com>"
 
-# install packages: psql and slim down image
+# install packages: tesseract-ocr and slim down image
 RUN apt-get update \
  && apt-get install --no-install-recommends -y \
   maven unzip tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng \

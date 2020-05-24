@@ -32,6 +32,7 @@ PDF File with embedded image
 	$ curl -T test/Dokument01.pdf http://localhost:9998/tika --header "X-Tika-PDFOcrStrategy: ocr_only"
 
 
+
 # Running and stopping a container
 
 You can start an instance of the postgres service with the Docker run command:
@@ -40,13 +41,44 @@ You can start an instance of the postgres service with the Docker run command:
 	    -p 9998:9998 \
 	    imixs/tika
 
-## Docker Swarm
+To run tika in a docker-compose or docker swarm environment just use the following setup:
 
-The imixs/tiker image can perfectly be used in a docker swarm environment. So you have a single service providing OCR functionallity via a Rest API.
+	  tika: 
+	    image: imixs/tika
+	    ports:
+	      - "9998:9998"  
+
+
+
+## Docker Swarm and Kubernetes
+
+The imixs/tiker image can perfectly be used in a docker swarm environment or in a kubernetes cluster. So you have a single service providing OCR functionallity via a Rest API.
 
 ## Imixs-Archive
  
 The [Imixs-Archive Project](https://github.com/imixs/imixs-archive/tree/master/imixs-archive-documents) provides a Imixs-Workflow plugin to be used for OCR. 
+
+
+
+# Configuration
+
+Out of the box, Apache Tika will start with the default configuration. Setting the environment Variable *TIKA_CONFIG* you can specify a custom tika configuration file to be used by the tika server. 
+
+Through a custom Tika Config xml file, it is possible to have a high degree of control over which detectors are or aren't used, in what order of preferences etc. It is also possible to override just certain parts, to (for example) have "default except for no POIFS Container Detction".
+You will find more about the configuration details [here](https://tika.apache.org/1.24.1/configuring.html).
+
+This is an example how you can set a custom tika-config.xml file in a docker-compose.yaml defintion:
+
+	  tika: 
+	    image: imixs/tika
+	    environment:
+	      TIKA_CONFIG: "/tika-config.xml"
+	    ...
+	    volumes:
+	      - ~/my-config/tika-config.xml:/tika-config.xml
+	    ....
+	  ...
+
 
 
 # Contribute

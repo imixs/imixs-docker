@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<properties>
+  <parsers>
+    <!-- This is a simple config example
+         Using the Default Parser for most things, except for 2 mime types, and never
+         use the Executable Parser
+         
+         Find more details here: https://tika.apache.org/1.24.1/configuring.html
+    -->
+    <parser class="org.apache.tika.parser.DefaultParser">
+      <mime-exclude>image/jpeg</mime-exclude>
+      <mime-exclude>application/pdf</mime-exclude>
+      <parser-exclude class="org.apache.tika.parser.executable.ExecutableParser"/>
+    </parser>
+    <!-- Use a different parser for PDF -->
+    <parser class="org.apache.tika.parser.EmptyParser">
+      <mime>application/pdf</mime>
+    </parser>
+  </parsers>
+</properties>
