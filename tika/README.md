@@ -80,6 +80,28 @@ This is an example how you can set a custom tika-config.xml file in a docker-com
 	  ...
 
 
+This is an example for a tika configuration with higher OCR resolution:
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<properties>
+	  <parsers>
+	    <parser class="org.apache.tika.parser.DefaultParser"></parser>
+	    <parser class="org.apache.tika.parser.pdf.PDFParser">
+	            <params>
+	            	<!-- OCR_ONLY  |  OCR_AND_TEXT_EXTRACTION  -->
+	                <param name="ocrStrategy" type="string">OCR_AND_TEXT_EXTRACTION</param>
+	                <!-- GRAY | RGB  -->
+	                <param name="ocrImageType" type="string">RGB</param>
+	                <param name="ocrDPI" type="int">400</param>
+	            </params>
+	    </parser>
+	  </parsers>
+	</properties>
+
+## OCR Tesseract
+
+You can also confgure the OCR feature based on Tesseract. Find details [here](https://cwiki.apache.org/confluence/display/TIKA/TikaOCR).
+
 
 # Contribute
 The source is available on [Github](https://github.com/imixs/imixs-docker). Please [report any issues](https://github.com/imixs/imixs-docker/issues).
