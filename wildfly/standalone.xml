@@ -165,6 +165,24 @@
                         <password>sa</password>
                     </security>
                 </datasource>
+              
+              
+              	<!-- imixs-workflow datasource -->
+                <datasource jta="true" jndi-name="java:/jdbc/office" pool-name="office" enabled="true" use-ccm="true">
+                	<connection-url>${env.POSTGRES_CONNECTION}</connection-url>
+				    <driver-class>org.postgresql.Driver</driver-class>
+				    <driver>postgresql</driver>
+				    <security>
+				      <user-name>${env.POSTGRES_USER}</user-name>
+				      <password>${env.POSTGRES_PASSWORD}</password>
+				    </security>
+                     <validation>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker"/>
+                        <!-- any background-validation-millis > 0 will enable background validation. See https://jira.jboss.org/browse/JBAS-4088. -->
+                        <background-validation-millis>60000</background-validation-millis>
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter"></exception-sorter>
+                    </validation>                
+                </datasource>                
                 <drivers>
                     <driver name="h2" module="com.h2database.h2">
                         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
@@ -414,6 +432,9 @@
             <mail-session name="default" jndi-name="java:jboss/mail/Default">
                 <smtp-server outbound-socket-binding-ref="mail-smtp"/>
             </mail-session>
+            <mail-session name="java:/mail/org.imixs.workflow.mail" jndi-name="java:/mail/org.imixs.workflow.mail" debug="false">
+            	<smtp-server outbound-socket-binding-ref="mail-smtp"/>
+            </mail-session>
         </subsystem>
         <subsystem xmlns="urn:wildfly:microprofile-config-smallrye:1.0"/>
         <subsystem xmlns="urn:wildfly:microprofile-health-smallrye:2.0" security-enabled="false" empty-liveness-checks-status="${env.MP_HEALTH_EMPTY_LIVENESS_CHECKS_STATUS:UP}" empty-readiness-checks-status="${env.MP_HEALTH_EMPTY_READINESS_CHECKS_STATUS:UP}"/>
@@ -464,6 +485,22 @@
                         <policy-module code="Delegating" flag="required"/>
                     </authorization>
                 </security-domain>
+                <security-domain name="imixsrealm">
+                    <authentication>
+                        <login-module code="Database" flag="required">
+                            <module-option name="dsJndiName" value="java:/jdbc/office"/>
+                            <module-option name="hashAlgorithm" value="SHA-256"/>
+                            <module-option name="hashEncoding" value="hex"/>
+                            <module-option name="principalsQuery" value="select PASSWORD from USERID where ID=?"/>
+                            <module-option name="rolesQuery" value="select GROUP_ID,'Roles' from USERID_USERGROUP where ID=?"/>
+                            <module-option name="unauthenticatedIdentity" value="anonymous"/>
+                        </login-module>
+                        <login-module code="RoleMapping" flag="required">
+                            <module-option name="rolesProperties" value="file:${jboss.server.config.dir}/imixsrealm.properties"/>
+                            <module-option name="replaceRole" value="false"/>
+                        </login-module>
+                    </authentication>
+                </security-domain>                
             </security-domains>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:security-manager:1.0">
@@ -530,7 +567,7 @@
         <socket-binding name="txn-recovery-environment" port="4712"/>
         <socket-binding name="txn-status-manager" port="4713"/>
         <outbound-socket-binding name="mail-smtp">
-            <remote-destination host="localhost" port="25"/>
+            <remote-destination host="mailgateway" port="25"/>
         </outbound-socket-binding>
     </socket-binding-group>
 </server>
