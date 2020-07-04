@@ -14,7 +14,7 @@ RUN groupadd -r imixs -g 901 && \
 WORKDIR /opt
 
 # set environments 
-ENV WILDFLY_VERSION 18.0.0.Final
+ENV WILDFLY_VERSION 20.0.0.Final
 ENV WILDFLY_HOME=/opt/wildfly
 ENV WILDFLY_DEPLOYMENT=$WILDFLY_HOME/standalone/deployments
 ENV WILDFLY_CONFIG=$WILDFLY_HOME/standalone/configuration
