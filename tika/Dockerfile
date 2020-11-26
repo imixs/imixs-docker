@@ -11,7 +11,7 @@ RUN apt-get update \
 
 
 # set environments 
-ENV TIKKA_VERSION 1.24
+ENV TIKKA_VERSION 1.24.1
 
 # Download latest version
 RUN wget https://www-eu.apache.org/dist/tika/tika-server-$TIKKA_VERSION.jar -o tika-server.jar
