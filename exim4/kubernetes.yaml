@@ -1,0 +1,85 @@
+###############################
+# Deplyoment mailgateway
+###############################
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mailgateway
+  namespace: kube-system
+  labels:
+    app: mailgateway
+spec:
+  replicas: 2
+  serviceName: "exim4"
+  selector:
+    matchLabels:
+      app: mailgateway
+  template:
+    metadata:
+      labels:
+        app: mailgateway
+    spec:
+      # 1st grant ownership to user for the spool directory
+      initContainers:
+      - name: take-spool-dir-ownership
+        image: alpine:3
+        command:
+        - chmod
+        - -R
+        - "777"
+        - /var/spool/exim4
+        volumeMounts:
+        - name: mailqueue
+          mountPath: /var/spool/exim4
+
+      containers:
+      - env:
+        - name: EXIM_SMARTHOST
+          value: "your-smart-host:25"
+        - name: EXIM_PASSWORD
+          value: "your-password"
+        - name: EXIM_ALLOWED_SENDERS
+          value: "10.0.1.0/24:10.0.0.0/24"
+        - name: EXIM_MESSAGE_SIZE_LIMIT
+          value: 255M
+        image: imixs/exim4:latest
+        name: mailgateway
+        ports:
+        - containerPort: 25
+          name: smtp
+        volumeMounts:
+        - name: mailqueue
+          mountPath: /var/spool/exim4
+
+  # for each exim4 instance we use a persistence volume with 2Gi
+  volumeClaimTemplates:
+  - metadata:
+      name: mailqueue
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi
+
+
+
+
+###############################
+# Service
+###############################
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mailgateway
+  namespace: kube-system
+spec:
+  selector:
+    app: mailgateway
+  ports:
+  - name: smtp
+    port: 25
+
+
+        

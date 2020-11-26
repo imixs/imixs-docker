@@ -87,6 +87,20 @@ With the following command you can test sending out an email
 
     echo "This is the message" | mail -s "The subject" captain.kirk@myhost.com -aFrom:sender@myhost.com
     
+## 4. The Exim4 Mail Queue
+
+In Exim4 mails are queued under the spooling directory:
+
+	/var/spool/exim4
+
+To test if mails exist in the queue run:
+
+	$ mailq
+
+You can force a retry to send queued mails with:
+
+	/usr/sbin/exim_tidydb -t 1d /var/spool/exim4 retry > /dev/null
+
 
 
 # Linking the Container
@@ -102,8 +116,15 @@ This environment variable defines, if other docker containers running on your do
 
 	...exim4 IP address .. relay not permitted...
 
+
+
+# Kubernetes
+
+In the yaml file *kubernetes.yaml* you can find an example how to deploy the container as a StatefulSet into a Kubernetes cluster. 
+In this example an external data volume for the exim4 spool database is added. You may customize this example to your own needs. 
      
 # Contribute
+
 The source is available on [Github](https://github.com/imixs/imixs-docker). Please [report any issues](https://github.com/imixs/imixs-docker/issues).
 
 To build the image from the Dockerfile run: 
