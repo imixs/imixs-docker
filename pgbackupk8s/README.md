@@ -24,7 +24,62 @@ The imixs/pgbackup image provides the following environment variables:
 * BACKUP\_ROOT\_DIR - backup root directory (e.g. "/imixs-cloud", default if not set will be "/imixs-cloud")
 * BACKUP\_MAX\_ROLLING - number of maximum backup files to be kept in the backup space
 
+## Deployment a Backup Job
 
+A backup job can be configured easily with a Kubernetes Job Deplyoment. See the following example where you need to replace the values in [] brackets with the values of your postgres deplyoment.
+
+	apiVersion: batch/v1
+	kind: Job
+	metadata:
+	  name: postgres2ftp
+	  namespace: [YOUR NAMESPACE]
+	spec:
+	  template:
+	    spec:
+	      containers:
+	        - name: pgbackupk8s
+	          image: imixs/pgbackupk8s:latest
+	          env:
+	          - name: POSTGRES_HOST
+	            value: db
+	          - name: POSTGRES_DB
+	            value: [YOUR DATABASE]
+	          - name: POSTGRES_USER
+	            value: [YOUR POSTGRES USER]
+	          - name: POSTGRES_PASSWORD
+	            value: [YOUR PASSWORD]
+	          - name: FTP_HOST
+	            value: "[YOUR FTP SERVER]"
+	          - name: FTP_USER
+	            value: "[YOUR FTP USER]"
+	          - name: SSH_KEY
+	            value: "/root/keys/backupspace_rsa" # the location of your ssh key file in a config map
+	          - name: BACKUP_ROOT_DIR
+	            value: "/"          
+	          - name: BACKUP_MAX_ROLLING
+	            value: "3"          
+	
+	          # Run the backup script
+	          command: ["/root/backup.sh"]
+	
+	          volumeMounts:
+	          - name: rsa-key
+	            mountPath: /root/keys
+	      volumes:
+	      - name: rsa-key
+	        configMap:
+	          name: rsa-key
+	
+	      restartPolicy: Never
+	  backoffLimit: 1
+ 
+ 
+To execute the job run:
+
+	$ kubectl apply -f my-job-backup.yaml
+
+You can verify the results in the log file of the finished job.  
+  
 ## Create a SSH Key
 
 

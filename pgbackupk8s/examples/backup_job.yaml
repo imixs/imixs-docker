@@ -1,25 +1,50 @@
+---
+###################################################
+# This job can be used as a template to backup a database 
+# into a ftp storage.
+# Replace the values in brackets []
+###################################################
+apiVersion: batch/v1
 kind: Job
 metadata:
-  name: backup_example
-  # Backup Job should run in the same namespace as the database
-  namespace: doreafamilie
+  name: postgres2ftp
+  namespace: [YOUR NAMESPACE]
 spec:
   template:
     spec:
       containers:
-        - name: backup
-          image: imixs/pgbackup
-
-          # Set environment params
+        - name: pgbackupk8s
+          image: imixs/pgbackupk8s:latest
           env:
+          - name: POSTGRES_HOST
+            value: db
           - name: POSTGRES_DB
-            value: office
-          - name: POSTGRES_PASSWORD
-            value: ships3455xuuio55
+            value: [YOUR DATABASE]
           - name: POSTGRES_USER
-            value: alglobal
+            value: [YOUR POSTGRES USER]
+          - name: POSTGRES_PASSWORD
+            value: [YOUR PASSWORD]
+          - name: FTP_HOST
+            value: "[YOUR FTP SERVER]"
+          - name: FTP_USER
+            value: "[YOUR FTP USER]"
+          - name: SSH_KEY
+            value: "/root/keys/backupspace_rsa" # the location of your ssh key file in a config map
+          - name: BACKUP_ROOT_DIR
+            value: "/"          
+          - name: BACKUP_MAX_ROLLING
+            value: "3"          
 
+          # Run the backup script
           command: ["/root/backup.sh"]
+
+          volumeMounts:
+          - name: rsa-key
+            mountPath: /root/keys
+      volumes:
+      - name: rsa-key
+        configMap:
+          name: rsa-key
 
       restartPolicy: Never
   backoffLimit: 1
