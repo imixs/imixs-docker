@@ -1,0 +1,25 @@
+kind: Job
+metadata:
+  name: backup_example
+  # Backup Job should run in the same namespace as the database
+  namespace: doreafamilie
+spec:
+  template:
+    spec:
+      containers:
+        - name: backup
+          image: imixs/pgbackup
+
+          # Set environment params
+          env:
+          - name: POSTGRES_DB
+            value: office
+          - name: POSTGRES_PASSWORD
+            value: ships3455xuuio55
+          - name: POSTGRES_USER
+            value: alglobal
+
+          command: ["/root/backup.sh"]
+
+      restartPolicy: Never
+  backoffLimit: 1
