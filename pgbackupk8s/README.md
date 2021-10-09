@@ -19,16 +19,10 @@ The imixs/pgbackup image provides the following environment variables:
 * POSTGRES\_USER - database user
 * POSTGRES\_PASSWORD - database user password
 * POSTGRES\_DB - the postgres  database name 
-
 * FTP\_HOST - ftp server, connected via SFTP/SCP 
 * FTP\_USER - ftp user 
-* BACKUP\_SERVICE\_NAME - name of the backup service (defines the target folder on FTP space)
-* BACKUP\_SPACE\_ROLLING - number of backup files to be kept in the backup space
 * BACKUP\_ROOT\_DIR - backup root directory (e.g. "/imixs-cloud", default if not set will be "/imixs-cloud")
-
-All backups are located in the following local directory 
-
-	/root/backups/
+* BACKUP\_MAX\_ROLLING - number of maximum backup files to be kept in the backup space
 
 
 ## Create a SSH Key
@@ -57,7 +51,7 @@ The mapping of the rsa-key within the Job yaml file looks like this:
       volumes:
       - name: rsa-key
         configMap:
-          name: backupspace-key
+          name: rsa-key
 
 
      
