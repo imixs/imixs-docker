@@ -20,8 +20,8 @@ The imixs/pgbackup image provides the following environment variables:
 * POSTGRES\_PASSWORD - database user password
 * POSTGRES\_DB - the postgres  database name 
 
-* BACKUP\_SPACE\_HOST - backup space connected via SFTP/SCP 
-* BACKUP\_SPACE\_USER - backup space user 
+* FTP\_HOST - ftp server, connected via SFTP/SCP 
+* FTP\_USER - ftp user 
 * BACKUP\_SERVICE\_NAME - name of the backup service (defines the target folder on FTP space)
 * BACKUP\_SPACE\_ROLLING - number of backup files to be kept in the backup space
 * BACKUP\_ROOT\_DIR - backup root directory (e.g. "/imixs-cloud", default if not set will be "/imixs-cloud")
@@ -72,14 +72,14 @@ The source is available on [Github](https://github.com/imixs/imixs-docker). Plea
 
 To build the image from the Dockerfile source file run: 
 
-    docker build --tag=imixs/pgbackup .
+    docker build --tag=imixs/pgbackupk8s .
  
 ### DockerHub
 
 To push the image manually to Docker-Hub
 
-	$ docker build -t imixs/pgbackup:X.X.X .
-	$ docker push imixs/pgbackup:X.X.X 
+	$ docker build -t imixs/pgbackupk8s:latest .
+	$ docker push imixs/pgbackupk8s:latest
 	
 	
 	

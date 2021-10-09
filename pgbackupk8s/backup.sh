@@ -3,7 +3,7 @@
 # *****************************************************************************************
 # * The backup script backups a given PSQL database within a Kubernetes deployment.       *
 # *                                                                                       *
-# * If a Backup Space is defined ($BACKUP_SPACE_HOST), the backup files will be moved     *
+# * If a Backup Space is defined ($FTP_HOST), the backup files will be moved     *
 # * into a backup space.  The environment variable $BACKUP_LOCAL_ROLLING defines how      *
 # * many backup files will be hold on the backup space.                                   *
 # *                                                                                       *
@@ -44,11 +44,11 @@ if [ "$BACKUP_ROOT_DIR" == "" ]
      BACKUP_ROOT_DIR="/"
 fi
 
-if [ "$BACKUP_SPACE_HOST" != "" ]
+if [ "$FTP_HOST" != "" ]
   then 
      echo "***        ...upload to backup space..."
      
-     sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST > /dev/null << SFTPEOF 
+     sftp $FTP_USER@$FTP_HOST > /dev/null << SFTPEOF 
        cd /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/
        put $BACKUP_FILE 
        quit
@@ -61,12 +61,12 @@ SFTPEOF
   # ****************************************************
 
   # first we count the existing backup files in the backup space
-  BACKUPS_EXIST_SPACE=$(echo ls -l /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/*_dump.tar.gz | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep -v ^l | wc -l)
+  BACKUPS_EXIST_SPACE=$(echo ls -l /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/*_dump.tar.gz | sftp $FTP_USER@$FTP_HOST | grep -v ^l | wc -l)
   # now we remove the files if we have more than defined BACKUP_SPACE_ROLLING...
   if [ "$BACKUPS_EXIST_SPACE" -gt "$BACKUP_SPACE_ROLLING" ] 
     then 
        # get a list of all dump files (tricky command because ls -t does not work)...
-       RESULT=`echo "ls /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/*_dump.*" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST | grep .tar.gz | sort -Vr`
+       RESULT=`echo "ls /$BACKUP_ROOT_DIR/$BACKUP_SERVICE_NAME/*_dump.*" | sftp $FTP_USER@$FTP_HOST | grep .tar.gz | sort -Vr`
        
        # remove the deprecated backup files...
        i=0
@@ -75,7 +75,7 @@ SFTPEOF
           (( i++ ))
           if (( i > max )); then
               echo "***        ...clean deprecated remote dump $line..."
-              echo "rm $line" | sftp $BACKUP_SPACE_USER@$BACKUP_SPACE_HOST
+              echo "rm $line" | sftp $FTP_USER@$FTP_HOST
           fi
        done <<< "$RESULT"
   fi
