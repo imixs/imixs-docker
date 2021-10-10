@@ -13,7 +13,7 @@
 echo '******** start pgbackup  ********'
 BACKUP_DATE="$(date +%Y-%m-%d_%H%M)" 
 DB_FILE='/root/db.sql' 
-BACKUP_FILE='/root/'$POSTGRES_DB'_'$BACKUP_DATE'_dump.tar.gz'
+BACKUP_FILE='/root/'$POSTGRES_DB'_'$BACKUP_DATE'_sql.gz'
 
 # determine namespace.....
 NAMESPACE=$(< /var/run/secrets/kubernetes.io/serviceaccount/namespace)
@@ -44,14 +44,8 @@ echo "...create .pgpass  "
 echo "$POSTGRES_HOST:5432:$POSTGRES_DB:$POSTGRES_USER:$POSTGRES_PASSWORD" > ~/.pgpass 
 chmod 600 ~/.pgpass 
 echo "...pg_dump database $POSTRES_DB..." 
-pg_dump -h$POSTGRES_HOST -U$POSTGRES_USER $POSTGRES_DB -Fc >> $DB_FILE 
-echo "...pg_dump finished" 
-ls -lah $DB_FILE
-
-# tar backup file
-echo "...tar backup...."
-tar -czf $BACKUP_FILE $DB_FILE
-rm $DB_FILE
+pg_dump -h$POSTGRES_HOST -U$POSTGRES_USER -d$POSTGRES_DB -Fc > $BACKUP_FILE
+#pg_dump -h$POSTGRES_HOST -U$POSTGRES_USER -d$POSTGRES_DB -C -c | gzip > $BACKUP_FILE
 ls -lah $BACKUP_FILE
 
 	
@@ -88,13 +82,13 @@ SFTPEOF
   # ****************************************************
   echo "...clean up deprecated backups..."
   # first we count the existing backup files in the backup space
-  BACKUPS_EXIST_SPACE=$(echo ls -l /$BACKUP_ROOT_DIR/$NAMESPACE/*_dump.tar.gz | sftp $FTP_USER@$FTP_HOST | grep -v ^l | wc -l)
+  BACKUPS_EXIST_SPACE=$(echo ls -l /$BACKUP_ROOT_DIR/$NAMESPACE/*_sql.gz | sftp $FTP_USER@$FTP_HOST | grep -v ^l | wc -l)
   # now we remove the files if we have more than defined BACKUP_MAX_ROLLING...
   if [ "$BACKUPS_EXIST_SPACE" -gt "$BACKUP_MAX_ROLLING" ] 
     then 
        echo "...clean deprecated backupfiles (max roling backups=$BACKUP_MAX_ROLLING)..."
        # get a list of all backup files (tricky command because ls -t does not work)...
-       RESULT=`echo "ls /$BACKUP_ROOT_DIR/$NAMESPACE/*_dump.*" | sftp $FTP_USER@$FTP_HOST | grep .tar.gz | sort -Vr`
+       RESULT=`echo "ls /$BACKUP_ROOT_DIR/$NAMESPACE/*_sql.gz" | sftp $FTP_USER@$FTP_HOST | grep .gz | sort -Vr`
        # remove the deprecated backup files...
        i=0
        max=$BACKUP_MAX_ROLLING

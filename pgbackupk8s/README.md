@@ -31,7 +31,7 @@ A backup job can be configured easily with a Kubernetes Job Deplyoment. See the 
 	apiVersion: batch/v1
 	kind: Job
 	metadata:
-	  name: postgres2ftp
+	  name: postgres2ftp-backup
 	  namespace: [YOUR NAMESPACE]
 	spec:
 	  template:

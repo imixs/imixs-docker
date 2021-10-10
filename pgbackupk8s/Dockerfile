@@ -13,4 +13,5 @@ RUN apt-get update \
 
 # add the backup scripts into root/home
 ADD backup.sh /root/backup.sh
-RUN chmod +x /root/backup.sh
+ADD restore.sh /root/restore.sh
+RUN chmod +x /root/*.sh
