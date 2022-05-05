@@ -46,12 +46,12 @@ ls -lsh /root/backups/
 
 # Create .pgpass
 echo "...create .pgpass  "
-echo "$POSTGRES_HOST:5432:$POSTGRES_DB:$POSTGRES_USER:$POSTGRES_PASSWORD" > ~/.pgpass 
+echo "$POSTGRES_HOST:$POSTGRES_PORT:$POSTGRES_DB:$POSTGRES_USER:$POSTGRES_PASSWORD" > ~/.pgpass 
 chmod 600 ~/.pgpass 
 
 # Restore database...
 echo "...restore database $POSTGRES_DB ..." 
-pg_restore -v -c -h$POSTGRES_HOST -U$POSTGRES_USER -d$POSTGRES_DB  /root/backups/dump_sql.gz
+pg_restore -v -c -h$POSTGRES_HOST -p$POSTGRES_PORT -U$POSTGRES_USER -d$POSTGRES_DB  /root/backups/dump_sql.gz
 
 echo '******** restore completed    ********'
 

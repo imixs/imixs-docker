@@ -41,10 +41,10 @@ fi
 # Backup database...
 echo "...database=$POSTGRES_DB ...." 
 echo "...create .pgpass  "
-echo "$POSTGRES_HOST:5432:$POSTGRES_DB:$POSTGRES_USER:$POSTGRES_PASSWORD" > ~/.pgpass 
+echo "$POSTGRES_HOST:$POSTGRES_PORT:$POSTGRES_DB:$POSTGRES_USER:$POSTGRES_PASSWORD" > ~/.pgpass 
 chmod 600 ~/.pgpass 
 echo "...pg_dump database $POSTRES_DB..." 
-pg_dump -h$POSTGRES_HOST -U$POSTGRES_USER -d$POSTGRES_DB -v -Fc > $BACKUP_FILE
+pg_dump -h$POSTGRES_HOST -p$POSTGRES_PORT -U$POSTGRES_USER -d$POSTGRES_DB -v -Fc > $BACKUP_FILE
 ls -lah $BACKUP_FILE
 
 	

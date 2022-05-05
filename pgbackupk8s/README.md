@@ -16,6 +16,7 @@ The Docker image `imixs/pgbackupk8s` provides a backup service for [Postgres Dat
 The imixs/pgbackup image provides the following environment variables:
 
 * POSTGRES\_HOST - database server
+* POSTGRES\_PORT - database port (default=5432)
 * POSTGRES\_USER - database user
 * POSTGRES\_PASSWORD - database user password
 * POSTGRES\_DB - the postgres  database name 
@@ -42,6 +43,8 @@ A backup job can be configured easily with a Kubernetes Job Deplyoment. See the 
 	          env:
 	          - name: POSTGRES_HOST
 	            value: db
+	          - name: POSTGRES_PORT
+	            value: 5432
 	          - name: POSTGRES_DB
 	            value: [YOUR DATABASE]
 	          - name: POSTGRES_USER
@@ -79,6 +82,11 @@ To execute the job run:
 	$ kubectl apply -f my-job-backup.yaml
 
 You can verify the results in the log file of the finished job.  
+
+Finally you can remove the job:
+
+	$ kubectl delete -f my-job-backup.yaml
+
   
 ## Create a SSH Key
 
