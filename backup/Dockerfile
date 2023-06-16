@@ -1,11 +1,11 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 LABEL authors="Ralph Soika <ralph.soika@imixs.com>, Simone Fardella <fardella.simone@gmail.com>"
 
 # install packages: psql and slim down image
 RUN apt-get update \
  && apt-get install --no-install-recommends -y \
-  cron ssh netcat mariadb-client postgresql-client-11 \
+  cron ssh netcat mariadb-client postgresql-client-13 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/man/?? /usr/share/man/??_*
 
