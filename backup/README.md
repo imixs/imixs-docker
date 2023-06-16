@@ -141,7 +141,7 @@ The following example shows a service definition of the backup service to backup
 
 	...
 	  backup:
-	    image: imixs/backup:1.2.1
+	    image: imixs/backup:latest
 	    environment:
 	      SETUP_CRON: "0 4 * * *"
 	      BACKUP_SERVICE_NAME: "my-service"
